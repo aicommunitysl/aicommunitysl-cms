@@ -40,9 +40,9 @@ export function AppShell({
         <Image
           src="/logo.svg"
           alt="AICSL"
-          width={30}
-          height={30}
-          style={{ width: 30, height: 30 }}
+          width={1615}
+          height={2938}
+          style={{ height: 30, width: "auto" }}
           className="shrink-0"
         />
         <div className="min-w-0 flex-1">
@@ -155,9 +155,9 @@ export function AppShell({
                 <Image
                   src="/logo.svg"
                   alt="AICSL"
-                  width={22}
-                  height={22}
-                  style={{ width: 22, height: 22 }}
+                  width={1615}
+                  height={2938}
+                  style={{ height: 22, width: "auto" }}
                 />
                 <span className="text-sm font-semibold">AICSL CMS</span>
               </div>

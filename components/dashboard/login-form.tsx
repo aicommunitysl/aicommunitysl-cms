@@ -35,10 +35,10 @@ export function LoginForm({ oauthError }: { oauthError?: string }) {
             <Image
               src="/logo.svg"
               alt="AI Community Sri Lanka"
-              width={44}
-              height={44}
+              width={1615}
+              height={2938}
               priority
-              style={{ width: 44, height: 44 }}
+              style={{ height: 44, width: "auto" }}
               className="shrink-0"
             />
             <div>
@@ -88,10 +88,10 @@ export function LoginForm({ oauthError }: { oauthError?: string }) {
             <Image
               src="/logo.svg"
               alt="AI Community Sri Lanka"
-              width={36}
-              height={36}
+              width={1615}
+              height={2938}
               priority
-              style={{ width: 36, height: 36 }}
+              style={{ height: 36, width: "auto" }}
               className="shrink-0"
             />
             <span className="text-sm font-semibold">
