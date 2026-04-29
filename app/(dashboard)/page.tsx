@@ -22,9 +22,7 @@ export default async function DashboardOverviewPage() {
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 Quick access
               </div>
-              <h3 className="mt-1.5 text-xl font-semibold">
-                Admin modules
-              </h3>
+              <h3 className="mt-1.5 text-xl font-semibold">Admin modules</h3>
             </div>
             <Badge tone="info">{visibleNavigation.length} modules</Badge>
           </div>

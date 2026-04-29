@@ -20,3 +20,17 @@ export async function getResourceItems<K extends keyof ResourceItemMap>(
 
   return normalizeListEnvelope<ResourceItemMap[K]>(resource, remoteData).items;
 }
+
+export async function getResourceItem<K extends keyof ResourceItemMap>(
+  resource: K,
+  id: string,
+) {
+  const token = await getAuthToken();
+  if (!token) {
+    return null as ResourceItemMap[K] | null;
+  }
+
+  return apiRequest<ResourceItemMap[K]>(`${getResourcePath(resource)}/${id}`, {
+    token,
+  });
+}

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AICSL CMS",
+  title: "aicommunitysl | CMS",
   description: "Official content management system for AI Community Sri Lanka.",
   icons: {
     icon: [
@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased bg-background text-foreground`}
       >

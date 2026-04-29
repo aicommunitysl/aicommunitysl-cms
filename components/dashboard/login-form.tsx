@@ -38,7 +38,8 @@ export function LoginForm({ oauthError }: { oauthError?: string }) {
               width={44}
               height={44}
               priority
-              className="shrink-0 dark:invert"
+              style={{ width: 44, height: 44 }}
+              className="shrink-0"
             />
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
@@ -63,7 +64,9 @@ export function LoginForm({ oauthError }: { oauthError?: string }) {
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-2xl border border-border bg-muted/40 p-4">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              <div className="mt-3 text-sm font-semibold">Role-aware access</div>
+              <div className="mt-3 text-sm font-semibold">
+                Role-aware access
+              </div>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
                 Admin and editor permissions enforced through the API.
               </p>
@@ -88,9 +91,12 @@ export function LoginForm({ oauthError }: { oauthError?: string }) {
               width={36}
               height={36}
               priority
-              className="shrink-0 dark:invert"
+              style={{ width: 36, height: 36 }}
+              className="shrink-0"
             />
-            <span className="text-sm font-semibold">AI Community Sri Lanka</span>
+            <span className="text-sm font-semibold">
+              AI Community Sri Lanka
+            </span>
           </div>
 
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">

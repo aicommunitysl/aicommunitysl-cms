@@ -1,0 +1,375 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { ArrowLeft, LoaderCircle, UploadCloud } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  resourceConfigs,
+  type ResourceConfig,
+  type ResourceField,
+} from "@/lib/resource-config";
+import type { ResourceItemMap } from "@/lib/cms";
+import type { SessionUser } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+type FormValues = Record<string, unknown>;
+type ResourceRecord = Record<string, unknown>;
+type EditorMode = "create" | "edit";
+
+function defaultPrepareValues(item: ResourceRecord) {
+  return { ...item };
+}
+
+function normalizeValue(value: unknown) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  return value ?? "";
+}
+
+function fieldSpanClass(field: ResourceField) {
+  return field.type === "textarea" ||
+    field.type === "json" ||
+    field.type === "multiline-list" ||
+    field.type === "image"
+    ? "md:col-span-2"
+    : "";
+}
+
+function renderField(
+  field: ResourceField,
+  value: unknown,
+  onChange: (name: string, value: unknown) => void,
+  onImageUpload: (name: string, file: File) => Promise<void>,
+  imageUploadingField: string | null,
+) {
+  const sharedDescription = field.description ? (
+    <p className="mt-2 text-xs leading-5 text-muted-foreground">
+      {field.description}
+    </p>
+  ) : null;
+
+  if (
+    field.type === "textarea" ||
+    field.type === "json" ||
+    field.type === "multiline-list"
+  ) {
+    return (
+      <div>
+        <Textarea
+          required={field.required}
+          value={String(normalizeValue(value))}
+          placeholder={field.placeholder}
+          onChange={(event) => onChange(field.name, event.target.value)}
+        />
+        {sharedDescription}
+      </div>
+    );
+  }
+
+  if (field.type === "select") {
+    return (
+      <div>
+        <Select
+          required={field.required}
+          value={String(normalizeValue(value))}
+          onChange={(event) => onChange(field.name, event.target.value)}
+        >
+          {field.options?.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </Select>
+        {sharedDescription}
+      </div>
+    );
+  }
+
+  if (field.type === "checkbox") {
+    return (
+      <label className="flex items-center gap-3 rounded-2xl border border-border bg-card/80 px-4 py-3 text-sm text-muted-foreground">
+        <input
+          type="checkbox"
+          checked={Boolean(value)}
+          onChange={(event) => onChange(field.name, event.target.checked)}
+        />
+        <span>{field.label}</span>
+      </label>
+    );
+  }
+
+  if (field.type === "image") {
+    return (
+      <div>
+        <div className="flex flex-col gap-3 md:flex-row">
+          <Input
+            required={field.required}
+            value={String(normalizeValue(value))}
+            placeholder={field.placeholder || "https://..."}
+            onChange={(event) => onChange(field.name, event.target.value)}
+          />
+          <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card px-4 text-sm font-medium text-foreground transition hover:bg-muted">
+            {imageUploadingField === field.name ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <UploadCloud className="h-4 w-4" />
+            )}
+            Upload
+            <input
+              className="hidden"
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  void onImageUpload(field.name, file);
+                }
+              }}
+            />
+          </label>
+        </div>
+        {sharedDescription}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Input
+        required={field.required}
+        type={field.type}
+        value={typeof value === "boolean" ? "" : String(normalizeValue(value))}
+        placeholder={field.placeholder}
+        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+          onChange(field.name, event.target.value)
+        }
+      />
+      {sharedDescription}
+    </div>
+  );
+}
+
+export function ResourceEditor({
+  resourceKey,
+  user,
+  mode,
+  recordId,
+  initialItem,
+}: {
+  resourceKey: keyof ResourceItemMap;
+  user: SessionUser;
+  mode: EditorMode;
+  recordId?: string;
+  initialItem?: ResourceItemMap[keyof ResourceItemMap];
+}) {
+  const router = useRouter();
+  const config = resourceConfigs[
+    resourceKey
+  ] as unknown as ResourceConfig<ResourceRecord>;
+  const isEditing = mode === "edit";
+  const baseHref = `/${config.resource}`;
+  const [formValues, setFormValues] = useState<FormValues>(() => {
+    if (isEditing && initialItem) {
+      const prepareValues = config.prepareFormValues || defaultPrepareValues;
+      return prepareValues(initialItem as unknown as ResourceRecord);
+    }
+
+    return { ...config.defaultValues };
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageUploadingField, setImageUploadingField] = useState<string | null>(
+    null,
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  function updateValue(name: string, value: unknown) {
+    setFormValues((current) => ({ ...current, [name]: value }));
+  }
+
+  async function handleImageUpload(name: string, file: File) {
+    try {
+      setImageUploadingField(name);
+      setError(null);
+
+      const payload = new FormData();
+      payload.set("file", file);
+      payload.set("folder", config.resource);
+
+      const response = await fetch("/api/upload/image", {
+        method: "POST",
+        body: payload,
+      });
+      const data = (await response.json()) as { url?: string; error?: string };
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || "Failed to upload image.");
+      }
+
+      updateValue(name, data.url);
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Failed to upload image.",
+      );
+    } finally {
+      setImageUploadingField(null);
+    }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      if (isEditing && !recordId) {
+        throw new Error("Missing record identifier.");
+      }
+
+      const payloadBuilder = isEditing
+        ? config.getUpdatePayload
+        : config.getCreatePayload;
+      const payload = payloadBuilder ? payloadBuilder(formValues) : formValues;
+
+      const response = await fetch(
+        isEditing
+          ? `/api/cms/${config.resource}/${recordId}`
+          : config.createEndpoint || `/api/cms/${config.resource}`,
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            `Failed to ${isEditing ? "update" : "create"} ${config.singular}.`,
+        );
+      }
+
+      router.push(baseHref);
+      router.refresh();
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : `Failed to save ${config.singular}.`,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-5xl">
+      <section className="section-shell animate-fade-up overflow-hidden">
+        <div className="border-b border-border/60 px-5 py-4 sm:px-6">
+          <Link
+            href={baseHref}
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to {config.title}
+          </Link>
+
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Editor
+              </div>
+              <h1 className="mt-1.5 text-2xl font-semibold">
+                {isEditing
+                  ? `Edit ${config.singular}`
+                  : `Create ${config.singular}`}
+              </h1>
+              <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
+                {config.description}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-card/70 px-4 py-3 text-sm text-muted-foreground">
+              Signed in as{" "}
+              <span className="font-medium text-foreground">{user.email}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-5 py-5 sm:px-6">
+          {error ? (
+            <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error}
+            </div>
+          ) : null}
+
+          <form
+            className="grid gap-4 md:grid-cols-2"
+            onSubmit={(event) => void handleSubmit(event)}
+          >
+            {config.fields.map((field) => (
+              <div
+                key={field.name}
+                className={cn("space-y-2", fieldSpanClass(field))}
+              >
+                {field.type === "checkbox" ? (
+                  renderField(
+                    field,
+                    formValues[field.name],
+                    updateValue,
+                    handleImageUpload,
+                    imageUploadingField,
+                  )
+                ) : (
+                  <>
+                    <label className="block text-sm font-medium text-foreground">
+                      {field.label}
+                    </label>
+                    {renderField(
+                      field,
+                      formValues[field.name],
+                      updateValue,
+                      handleImageUpload,
+                      imageUploadingField,
+                    )}
+                  </>
+                )}
+              </div>
+            ))}
+
+            <div className="flex flex-col-reverse gap-3 border-t border-border/60 pt-5 md:col-span-2 sm:flex-row sm:justify-end">
+              <Button variant="secondary" onClick={() => router.push(baseHref)}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="sm:min-w-40"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : null}
+                {isEditing
+                  ? `Save ${config.singular}`
+                  : `Create ${config.singular}`}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  );
+}

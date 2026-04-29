@@ -23,6 +23,14 @@ export const listKeyMap: Record<string, string> = {
   users: "users",
 };
 
+export const resourceKeys = Object.keys(listKeyMap) as Array<
+  keyof ResourceItemMap
+>;
+
+export function isResourceKey(value: string): value is keyof ResourceItemMap {
+  return value in listKeyMap;
+}
+
 export function normalizeListEnvelope<T>(
   resource: string,
   data: Record<string, unknown>,

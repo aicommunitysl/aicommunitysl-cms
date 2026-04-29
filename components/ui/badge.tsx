@@ -3,9 +3,11 @@ import { cn } from "@/lib/utils";
 export function Badge({
   children,
   tone = "default",
+  className,
 }: {
   children: React.ReactNode;
   tone?: "default" | "success" | "warning" | "danger" | "info";
+  className?: string;
 }) {
   const tones = {
     default: "bg-card/80 text-muted-foreground",
@@ -20,6 +22,7 @@ export function Badge({
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
         tones[tone],
+        className,
       )}
     >
       {children}

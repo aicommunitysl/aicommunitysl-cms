@@ -21,6 +21,19 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: keyof typeof sizeVariants;
 }
 
+export function buttonClasses(
+  variant: keyof typeof buttonVariants = "primary",
+  size: keyof typeof sizeVariants = "md",
+  className?: string,
+) {
+  return cn(
+    "inline-flex items-center justify-center gap-2 rounded-2xl font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
+    buttonVariants[variant],
+    sizeVariants[size],
+    className,
+  );
+}
+
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(
     { className, variant = "primary", size = "md", type = "button", ...props },

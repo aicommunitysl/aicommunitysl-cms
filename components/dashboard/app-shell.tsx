@@ -42,11 +42,12 @@ export function AppShell({
           alt="AICSL"
           width={30}
           height={30}
-          className="shrink-0 dark:invert"
+          style={{ width: 30, height: 30 }}
+          className="shrink-0"
         />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold leading-tight">
-            AI Community SL
+            aicommunitysl
           </div>
           <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             CMS
@@ -62,7 +63,7 @@ export function AppShell({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+      <nav className="overflow-y-auto px-3 py-3 space-y-0.5">
         {visibleNav.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -86,8 +87,8 @@ export function AppShell({
       </nav>
 
       {/* Bottom: Profile + Sign out */}
-      <div className="border-t border-border/50 px-3 py-3 space-y-0.5">
-        <div className="flex items-center gap-2.5 rounded-xl px-3 py-2.5">
+      <div className="mx-3 mt-1 border-t border-border/50 py-3">
+        <div className="flex items-center gap-2.5 rounded-xl border border-border/50 bg-muted/20 px-3 py-2.5">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
             <User className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
@@ -102,7 +103,7 @@ export function AppShell({
         </div>
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           <span>Sign out</span>
@@ -131,16 +132,16 @@ export function AppShell({
         {sidebarContent}
       </aside>
 
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-4 p-3 md:gap-5 md:p-4 lg:gap-5 lg:p-5">
+      <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-3 p-3 md:gap-4 md:p-4 lg:p-5">
         {/* Desktop sidebar */}
         <aside className="glass-panel hidden w-56 shrink-0 flex-col rounded-2xl border border-border/50 lg:flex">
           {sidebarContent}
         </aside>
 
         {/* Main area */}
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 md:gap-4">
           {/* Top header */}
-          <header className="glass-panel rounded-2xl border border-border/50 px-4 py-3">
+          <header className="glass-panel rounded-2xl border border-border/50 px-4 py-2.5 md:py-3">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMobileOpen(true)}
@@ -156,7 +157,7 @@ export function AppShell({
                   alt="AICSL"
                   width={22}
                   height={22}
-                  className="dark:invert"
+                  style={{ width: 22, height: 22 }}
                 />
                 <span className="text-sm font-semibold">AICSL CMS</span>
               </div>
