@@ -276,6 +276,7 @@ export function ResourceManager<
       setImageUploadingField(name);
       const payload = new FormData();
       payload.set("file", file);
+      payload.set("folder", config.resource);
 
       const response = await fetch("/api/upload/image", {
         method: "POST",

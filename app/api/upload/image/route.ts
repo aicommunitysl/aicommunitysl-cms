@@ -19,8 +19,13 @@ export async function POST(request: Request) {
       );
     }
 
+    const folder = formData.get("folder");
+
     const uploadData = new FormData();
     uploadData.set("file", file);
+    if (typeof folder === "string" && folder) {
+      uploadData.set("folder", folder);
+    }
 
     const result = await apiRequest<{ url: string }>("/api/v1/upload/image", {
       method: "POST",
