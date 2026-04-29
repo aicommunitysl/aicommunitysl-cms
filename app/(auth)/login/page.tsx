@@ -3,8 +3,8 @@ import { LoginForm } from "@/components/dashboard/login-form";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const resolvedSearchParams = await searchParams;
-  return <LoginForm nextPath={resolvedSearchParams.next || "/"} />;
+  return <LoginForm oauthError={resolvedSearchParams.error} />;
 }
