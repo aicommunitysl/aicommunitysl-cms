@@ -1,13 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { LogOut, Menu, User, X } from "lucide-react";
 
 import { navigationItems, roleLabels } from "@/lib/constants";
 import type { SessionUser } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -20,6 +21,7 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -27,96 +29,159 @@ export function AppShell({
     router.refresh();
   }
 
+  const visibleNav = navigationItems.filter(
+    (item) => !item.roles || item.roles.includes(user.role),
+  );
+
+  const sidebarContent = (
+    <div className="flex h-full flex-col">
+      {/* Logo & brand */}
+      <div className="flex items-center gap-3 border-b border-border/50 px-4 py-4">
+        <Image
+          src="/logo.svg"
+          alt="AICSL"
+          width={30}
+          height={30}
+          className="shrink-0 dark:invert"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-semibold leading-tight">
+            AI Community SL
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            CMS
+          </div>
+        </div>
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="ml-auto rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+          aria-label="Close menu"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+        {visibleNav.map((item) => {
+          const Icon = item.icon;
+          const active = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom: Profile + Sign out */}
+      <div className="border-t border-border/50 px-3 py-3 space-y-0.5">
+        <div className="flex items-center gap-2.5 rounded-xl px-3 py-2.5">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <User className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-xs font-medium text-foreground">
+              {user.email}
+            </div>
+            <div className="text-[10px] text-muted-foreground">
+              {roleLabels[user.role]}
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          <span>Sign out</span>
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="dash-grid min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-400 gap-6 px-4 py-4 md:px-6 lg:px-8">
-        <aside className="glass-panel hidden w-80 shrink-0 flex-col rounded-[28px] border border-border/50 p-5 lg:flex">
-          <div className="mb-8">
-            <div className="mb-3 inline-flex rounded-full bg-[rgba(0,120,212,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-              Official CMS
-            </div>
-            <h1 className="text-2xl font-semibold text-balance">
-              AI Community Sri Lanka
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Manage the platform content, static pages, speaker applications,
-              and inbound messages from one place.
-            </p>
-          </div>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-          <nav className="space-y-2">
-            {navigationItems
-              .filter((item) => !item.roles || item.roles.includes(user.role))
-              .map((item) => {
-                const Icon = item.icon;
-                const active = pathname === item.href;
+      {/* Mobile sidebar drawer */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-border/50 transition-transform duration-200 lg:hidden",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        {sidebarContent}
+      </aside>
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
-                      active
-                        ? "bg-primary text-primary-foreground shadow-[0_18px_35px_rgba(0,120,212,0.22)]"
-                        : "text-muted-foreground hover:bg-card/70 hover:text-foreground",
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-          </nav>
-
-          <div className="mt-auto rounded-3xl bg-primary p-4 text-primary-foreground shadow-[0_18px_35px_rgba(0,120,212,0.18)]">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-foreground/10">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="text-sm font-medium">{user.email}</div>
-                <div className="mt-1 text-xs text-primary-foreground/70">
-                  {roleLabels[user.role]}
-                </div>
-              </div>
-            </div>
-            <Button
-              variant="secondary"
-              className="mt-4 w-full justify-center bg-foreground/10 text-primary-foreground hover:bg-foreground/20"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </Button>
-          </div>
+      <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-4 p-3 md:gap-5 md:p-4 lg:gap-5 lg:p-5">
+        {/* Desktop sidebar */}
+        <aside className="glass-panel hidden w-56 shrink-0 flex-col rounded-2xl border border-border/50 lg:flex">
+          {sidebarContent}
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <header className="glass-panel animate-fade-up rounded-[28px] border border-border/50 p-4 sm:p-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+        {/* Main area */}
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          {/* Top header */}
+          <header className="glass-panel rounded-2xl border border-border/50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+                aria-label="Open menu"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center gap-2 lg:hidden">
+                <Image
+                  src="/logo.svg"
+                  alt="AICSL"
+                  width={22}
+                  height={22}
+                  className="dark:invert"
+                />
+                <span className="text-sm font-semibold">AICSL CMS</span>
+              </div>
+
+              <div className="hidden lg:block">
+                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                   Admin Console
                 </div>
-                <div className="mt-2 flex items-center gap-3">
-                  <h2 className="text-2xl font-semibold text-balance">
-                    Platform operations and content publishing
-                  </h2>
-                  <Badge tone={user.role === "admin" ? "warning" : "info"}>
-                    {roleLabels[user.role]}
-                  </Badge>
-                </div>
+                <h2 className="text-base font-semibold leading-tight">
+                  Platform operations
+                </h2>
               </div>
-              <div className="flex items-center gap-4">
+
+              <div className="ml-auto flex items-center gap-2.5">
+                <Badge
+                  tone={user.role === "admin" ? "warning" : "info"}
+                  className="hidden sm:inline-flex"
+                >
+                  {roleLabels[user.role]}
+                </Badge>
                 <ThemeToggle />
-                <div className="hidden lg:block rounded-2xl border border-border bg-card/70 px-4 py-3 text-sm text-muted-foreground">
-                  Content changes are applied against the live API contracts
-                  used by the public website.
-                </div>
               </div>
             </div>
           </header>
+
           <main className="min-w-0">{children}</main>
         </div>
       </div>

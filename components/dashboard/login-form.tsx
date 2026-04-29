@@ -1,6 +1,7 @@
 "use client";
 
-import { LockKeyhole, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { ShieldCheck, LockKeyhole } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -22,69 +23,101 @@ export function LoginForm({ oauthError }: { oauthError?: string }) {
   const error = resolveOAuthError(oauthError);
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10 md:px-8">
+    <main className="relative flex min-h-screen items-center justify-center px-4 py-8">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="section-shell hidden overflow-hidden p-8 lg:block">
-          <div className="inline-flex rounded-full bg-[rgba(0,120,212,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-            Secure workspace
-          </div>
-          <h1 className="mt-5 max-w-xl text-5xl font-semibold leading-tight text-balance">
-            Official CMS for AI Community Sri Lanka platform operations.
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-8 text-muted-foreground">
-            Publish events, manage partners, update the team roster, review
-            speaker applications, and keep static content aligned with the live
-            API-backed website.
-          </p>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-border bg-card/80 p-5">
-              <ShieldCheck className="h-6 w-6 text-primary" />
-              <div className="mt-4 text-lg font-semibold">
-                Role-aware access
+
+      <div className="grid w-full max-w-5xl items-center gap-8 lg:grid-cols-2">
+        {/* Left panel — branding */}
+        <section className="section-shell hidden flex-col gap-8 rounded-3xl p-8 lg:flex">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo.svg"
+              alt="AI Community Sri Lanka"
+              width={44}
+              height={44}
+              priority
+              className="shrink-0 dark:invert"
+            />
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                Official CMS
               </div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Admin and editor permissions are enforced through the API and
-                protected proxy routes.
+              <div className="text-base font-semibold leading-tight">
+                AI Community Sri Lanka
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h1 className="text-4xl font-semibold leading-snug text-balance">
+              Manage the platform from one secure workspace.
+            </h1>
+            <p className="mt-4 text-sm leading-7 text-muted-foreground">
+              Publish events, manage partners, update the team, review speaker
+              applications, and keep content aligned with the live website.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-border bg-muted/40 p-4">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <div className="mt-3 text-sm font-semibold">Role-aware access</div>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Admin and editor permissions enforced through the API.
               </p>
             </div>
-            <div className="rounded-3xl border border-border bg-card/80 p-5">
-              <LockKeyhole className="h-6 w-6 text-foreground" />
-              <div className="mt-4 text-lg font-semibold">
-                Cookie-backed sessions
-              </div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                The FastAPI JWT stays server-side. The browser only receives a
-                secure session cookie.
+            <div className="rounded-2xl border border-border bg-muted/40 p-4">
+              <LockKeyhole className="h-5 w-5 text-foreground" />
+              <div className="mt-3 text-sm font-semibold">Secure sessions</div>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                JWT stays server-side. Browser only receives a session cookie.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="section-shell glass-panel mx-auto w-full max-w-xl p-8 sm:p-10">
-          <div className="inline-flex rounded-full bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        {/* Right panel — sign in */}
+        <section className="glass-panel mx-auto w-full max-w-sm rounded-3xl p-8">
+          {/* Mobile logo */}
+          <div className="mb-6 flex items-center gap-3 lg:hidden">
+            <Image
+              src="/logo.svg"
+              alt="AI Community Sri Lanka"
+              width={36}
+              height={36}
+              priority
+              className="shrink-0 dark:invert"
+            />
+            <span className="text-sm font-semibold">AI Community Sri Lanka</span>
+          </div>
+
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Administrator login
           </div>
-          <h2 className="mt-4 text-3xl font-semibold">Sign in to the CMS</h2>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Use a Google account that has been approved for CMS access.
+          <h2 className="mt-2 text-2xl font-semibold">Sign in to CMS</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Use an approved Google account to continue.
           </p>
 
           {error ? (
-            <div className="mt-6 rounded-2xl border border-[rgba(220,38,38,0.16)] bg-[rgba(220,38,38,0.08)] px-4 py-3 text-sm text-destructive">
+            <div className="mt-5 rounded-xl border border-destructive/20 bg-destructive/8 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           ) : null}
 
           <a
             href="/api/auth/google/login"
-            className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="mt-6 flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-border/70 bg-card px-4 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <GoogleIcon />
-            Sign in with Google
+            Continue with Google
           </a>
+
+          <p className="mt-5 text-center text-xs text-muted-foreground">
+            Access is restricted to approved accounts only.
+          </p>
         </section>
       </div>
     </main>

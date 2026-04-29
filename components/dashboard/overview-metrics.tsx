@@ -79,70 +79,47 @@ export function OverviewMetrics() {
   }, []);
 
   return (
-    <section className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
-      <div className="section-shell animate-fade-up p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              Overview
-            </div>
-            <h3 className="mt-2 text-2xl font-semibold">Release foundation</h3>
+    <section className="section-shell animate-fade-up p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Overview
           </div>
-          <Badge tone="info">v1.0.0 scope</Badge>
+          <h3 className="mt-1.5 text-xl font-semibold">Platform metrics</h3>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {cards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <div
-                key={card.resource}
-                className="rounded-3xl border border-border bg-card/80 p-5"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-foreground">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <Badge tone={card.tone}>{card.label}</Badge>
+        <Badge tone="info">v1.0.0</Badge>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.resource}
+              className="rounded-2xl border border-border bg-card/80 p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-foreground">
+                  <Icon className="h-4 w-4" />
                 </div>
-                <div className="mt-6 text-4xl font-semibold">
-                  {counts[card.resource] ?? "--"}
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {card.resource === "contact"
-                    ? "Tracked submissions and message handling."
-                    : `Records available in the ${card.label.toLowerCase()} module.`}
-                </p>
+                <Badge tone={card.tone}>{card.label}</Badge>
               </div>
-            );
-          })}
-        </div>
+              <div className="mt-4 text-3xl font-semibold">
+                {counts[card.resource] ?? "--"}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {card.resource === "contact"
+                  ? "Tracked submissions"
+                  : `${card.label} records`}
+              </p>
+            </div>
+          );
+        })}
       </div>
-
-      <div className="section-shell animate-fade-up p-6 [animation-delay:120ms]">
-        <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Operational notes
+      {error ? (
+        <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+          {error}
         </div>
-        <h3 className="mt-2 text-xl font-semibold">What this CMS covers</h3>
-        <div className="mt-5 space-y-4 text-sm leading-6 text-muted-foreground">
-          <p>
-            Authenticated admin workspace with editor and admin roles, secure
-            cookie-backed sessions, and protected routes.
-          </p>
-          <p>
-            API-backed CRUD for events, partners, team, milestones, social
-            links, contact submissions, speaker applications, and static pages.
-          </p>
-          <p>
-            Proxy routes keep the FastAPI JWT out of the browser while still
-            using the backend as the single source of truth.
-          </p>
-        </div>
-        {error ? (
-          <div className="mt-6 rounded-2xl border border-[rgba(220,38,38,0.18)] bg-[rgba(220,38,38,0.08)] px-4 py-3 text-sm text-destructive">
-            {error}
-          </div>
-        ) : null}
-      </div>
+      ) : null}
     </section>
   );
 }
