@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarDays, FileText, Inbox, Users } from "lucide-react";
+import { CalendarDays, Inbox, KanbanSquare, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import type { ListEnvelope } from "@/lib/types";
@@ -20,9 +20,9 @@ const cards = [
     tone: "success" as const,
   },
   {
-    resource: "content",
-    label: "Managed Pages",
-    icon: FileText,
+    resource: "event-tasks",
+    label: "Event Tasks",
+    icon: KanbanSquare,
     tone: "warning" as const,
   },
   {
@@ -109,7 +109,9 @@ export function OverviewMetrics() {
               <p className="mt-1 text-xs text-muted-foreground">
                 {card.resource === "contact"
                   ? "Tracked submissions"
-                  : `${card.label} records`}
+                  : card.resource === "event-tasks"
+                    ? "Across all events"
+                    : `${card.label} records`}
               </p>
             </div>
           );
