@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useState } from "react";
-import { ArrowLeft, LoaderCircle, UploadCloud } from "lucide-react";
+import {
+  ArrowLeft,
+  LoaderCircle,
+  Plus,
+  Trash2,
+  UploadCloud,
+} from "lucide-react";
+import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +29,211 @@ type FormValues = Record<string, unknown>;
 type ResourceRecord = Record<string, unknown>;
 type EditorMode = "create" | "edit";
 
+interface SpeakerEntry {
+  name: string;
+  role?: string;
+  image_url?: string;
+}
+
+interface SessionEntry {
+  title: string;
+  time: string;
+  speaker?: string;
+  description?: string;
+}
+
+function SpeakerListField({
+  value,
+  onChange,
+}: {
+  value: unknown;
+  onChange: (entries: SpeakerEntry[]) => void;
+}) {
+  const entries: SpeakerEntry[] = Array.isArray(value)
+    ? (value as SpeakerEntry[])
+    : [];
+
+  function updateEntry(index: number, field: keyof SpeakerEntry, val: string) {
+    const next = entries.map((e, i) =>
+      i === index ? { ...e, [field]: val } : e,
+    );
+    onChange(next);
+  }
+
+  function addEntry() {
+    onChange([...entries, { name: "", role: "", image_url: "" }]);
+  }
+
+  function removeEntry(index: number) {
+    onChange(entries.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div className="space-y-3">
+      {entries.map((entry, index) => (
+        <div
+          key={index}
+          className="relative rounded-2xl border border-border/60 bg-card/60 p-4"
+        >
+          <button
+            type="button"
+            onClick={() => removeEntry(index)}
+            className="absolute right-3 top-3 rounded-lg p-1 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <div className="grid gap-3 pr-8 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Name <span className="text-destructive">*</span>
+              </label>
+              <Input
+                required
+                value={entry.name}
+                placeholder="Speaker name"
+                onChange={(e) => updateEntry(index, "name", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Role
+              </label>
+              <Input
+                value={entry.role ?? ""}
+                placeholder="e.g. Keynote Speaker"
+                onChange={(e) => updateEntry(index, "role", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Image URL
+              </label>
+              <Input
+                value={entry.image_url ?? ""}
+                placeholder="https://..."
+                onChange={(e) =>
+                  updateEntry(index, "image_url", e.target.value)
+                }
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={addEntry}
+        className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground transition hover:border-foreground/40 hover:text-foreground"
+      >
+        <Plus className="h-4 w-4" />
+        Add speaker
+      </button>
+    </div>
+  );
+}
+
+function SessionListField({
+  value,
+  onChange,
+}: {
+  value: unknown;
+  onChange: (entries: SessionEntry[]) => void;
+}) {
+  const entries: SessionEntry[] = Array.isArray(value)
+    ? (value as SessionEntry[])
+    : [];
+
+  function updateEntry(index: number, field: keyof SessionEntry, val: string) {
+    const next = entries.map((e, i) =>
+      i === index ? { ...e, [field]: val } : e,
+    );
+    onChange(next);
+  }
+
+  function addEntry() {
+    onChange([
+      ...entries,
+      { title: "", time: "", speaker: "", description: "" },
+    ]);
+  }
+
+  function removeEntry(index: number) {
+    onChange(entries.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div className="space-y-3">
+      {entries.map((entry, index) => (
+        <div
+          key={index}
+          className="relative rounded-2xl border border-border/60 bg-card/60 p-4"
+        >
+          <button
+            type="button"
+            onClick={() => removeEntry(index)}
+            className="absolute right-3 top-3 rounded-lg p-1 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <div className="grid gap-3 pr-8 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Title <span className="text-destructive">*</span>
+              </label>
+              <Input
+                required
+                value={entry.title}
+                placeholder="Session title"
+                onChange={(e) => updateEntry(index, "title", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Time <span className="text-destructive">*</span>
+              </label>
+              <Input
+                required
+                value={entry.time}
+                placeholder="e.g. 09:00"
+                onChange={(e) => updateEntry(index, "time", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Speaker
+              </label>
+              <Input
+                value={entry.speaker ?? ""}
+                placeholder="Speaker name"
+                onChange={(e) => updateEntry(index, "speaker", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Description
+              </label>
+              <Input
+                value={entry.description ?? ""}
+                placeholder="Short description"
+                onChange={(e) =>
+                  updateEntry(index, "description", e.target.value)
+                }
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={addEntry}
+        className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground transition hover:border-foreground/40 hover:text-foreground"
+      >
+        <Plus className="h-4 w-4" />
+        Add session
+      </button>
+    </div>
+  );
+}
+
 function defaultPrepareValues(item: ResourceRecord) {
   return { ...item };
 }
@@ -38,7 +250,9 @@ function fieldSpanClass(field: ResourceField) {
   return field.type === "textarea" ||
     field.type === "json" ||
     field.type === "multiline-list" ||
-    field.type === "image"
+    field.type === "image" ||
+    field.type === "speaker-list" ||
+    field.type === "session-list"
     ? "md:col-span-2"
     : "";
 }
@@ -138,6 +352,24 @@ function renderField(
         </div>
         {sharedDescription}
       </div>
+    );
+  }
+
+  if (field.type === "speaker-list") {
+    return (
+      <SpeakerListField
+        value={value}
+        onChange={(entries) => onChange(field.name, entries)}
+      />
+    );
+  }
+
+  if (field.type === "session-list") {
+    return (
+      <SessionListField
+        value={value}
+        onChange={(entries) => onChange(field.name, entries)}
+      />
     );
   }
 
@@ -262,6 +494,11 @@ export function ResourceEditor({
         );
       }
 
+      toast.success(
+        isEditing
+          ? `${config.singular.charAt(0).toUpperCase() + config.singular.slice(1)} updated successfully!`
+          : `${config.singular.charAt(0).toUpperCase() + config.singular.slice(1)} created successfully!`,
+      );
       router.push(baseHref);
       router.refresh();
     } catch (submitError) {
@@ -326,13 +563,35 @@ export function ResourceEditor({
                 className={cn("space-y-2", fieldSpanClass(field))}
               >
                 {field.type === "checkbox" ? (
-                  renderField(
-                    field,
-                    formValues[field.name],
-                    updateValue,
-                    handleImageUpload,
-                    imageUploadingField,
-                  )
+                  <>
+                    <span
+                      className="block text-sm font-medium text-foreground"
+                      aria-hidden
+                    >
+                      &nbsp;
+                    </span>
+                    {renderField(
+                      field,
+                      formValues[field.name],
+                      updateValue,
+                      handleImageUpload,
+                      imageUploadingField,
+                    )}
+                  </>
+                ) : field.type === "speaker-list" ||
+                  field.type === "session-list" ? (
+                  <>
+                    <label className="block text-sm font-medium text-foreground">
+                      {field.label}
+                    </label>
+                    {renderField(
+                      field,
+                      formValues[field.name],
+                      updateValue,
+                      handleImageUpload,
+                      imageUploadingField,
+                    )}
+                  </>
                 ) : (
                   <>
                     <label className="block text-sm font-medium text-foreground">
