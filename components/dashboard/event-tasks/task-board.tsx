@@ -134,11 +134,7 @@ export function TaskBoard({
                   onDragEnd={() => setDraggingId(null)}
                   className={`cursor-grab active:cursor-grabbing transition-opacity ${draggingId === task.id ? "opacity-40" : "opacity-100"}`}
                 >
-                  <TaskCard
-                    task={task}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
+                  <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} />
                 </div>
               ))}
 

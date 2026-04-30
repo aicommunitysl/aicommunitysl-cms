@@ -94,7 +94,9 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           <div className="h-1 rounded-full bg-muted overflow-hidden">
             <div
               className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${totalSubs ? (doneSubs / totalSubs) * 100 : 0}%` }}
+              style={{
+                width: `${totalSubs ? (doneSubs / totalSubs) * 100 : 0}%`,
+              }}
             />
           </div>
         </div>

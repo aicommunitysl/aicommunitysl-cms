@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { CalendarDays, KanbanSquare, LayoutList, Plus, Search } from "lucide-react";
+import {
+  CalendarDays,
+  KanbanSquare,
+  LayoutList,
+  Plus,
+  Search,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -9,7 +15,12 @@ import { Input } from "@/components/ui/input";
 import { TaskBoard } from "./task-board";
 import { TaskTable } from "./task-table";
 import { TaskForm } from "./task-form";
-import type { EventItem, EventTaskItem, TaskStatus, UserItem } from "@/lib/types";
+import type {
+  EventItem,
+  EventTaskItem,
+  TaskStatus,
+  UserItem,
+} from "@/lib/types";
 import { deleteEventTask } from "@/lib/api";
 
 type View = "kanban" | "table";

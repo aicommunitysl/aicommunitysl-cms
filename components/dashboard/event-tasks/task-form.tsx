@@ -6,7 +6,12 @@ import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { EventItem, EventTaskItem, SubTaskItem, UserItem } from "@/lib/types";
+import type {
+  EventItem,
+  EventTaskItem,
+  SubTaskItem,
+  UserItem,
+} from "@/lib/types";
 import { createEventTask, updateEventTask } from "@/lib/api";
 
 interface TaskFormProps {
@@ -45,7 +50,7 @@ export function TaskForm({
   const isEditing = !!task;
 
   const [eventId, setEventId] = useState(
-    task?.event_id ?? defaultEventId ?? (events[0]?.id ?? ""),
+    task?.event_id ?? defaultEventId ?? events[0]?.id ?? "",
   );
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
@@ -58,9 +63,7 @@ export function TaskForm({
   const [dueDate, setDueDate] = useState(
     task?.due_date ? task.due_date.slice(0, 10) : "",
   );
-  const [subtasks, setSubtasks] = useState<SubTaskItem[]>(
-    task?.subtasks ?? [],
-  );
+  const [subtasks, setSubtasks] = useState<SubTaskItem[]>(task?.subtasks ?? []);
   const [newSubtask, setNewSubtask] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -123,7 +126,10 @@ export function TaskForm({
         saved = await updateEventTask(token, task.id, payload);
         toast.success("Task updated successfully!");
       } else {
-        saved = await createEventTask(token, payload as Parameters<typeof createEventTask>[1]);
+        saved = await createEventTask(
+          token,
+          payload as Parameters<typeof createEventTask>[1],
+        );
         toast.success("Task created successfully!");
       }
       onSave(saved);
@@ -158,10 +164,15 @@ export function TaskForm({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-5 p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-1 flex-col gap-5 p-6"
+        >
           {/* Event selector */}
           <div className="space-y-1.5">
-            <label htmlFor="event" className="text-sm font-medium">Event</label>
+            <label htmlFor="event" className="text-sm font-medium">
+              Event
+            </label>
             <select
               id="event"
               value={eventId}
@@ -192,7 +203,9 @@ export function TaskForm({
 
           {/* Description */}
           <div className="space-y-1.5">
-            <label htmlFor="description" className="text-sm font-medium">Description</label>
+            <label htmlFor="description" className="text-sm font-medium">
+              Description
+            </label>
             <textarea
               id="description"
               value={description}
@@ -206,11 +219,15 @@ export function TaskForm({
           {/* Status + Priority */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="status" className="text-sm font-medium">Status</label>
+              <label htmlFor="status" className="text-sm font-medium">
+                Status
+              </label>
               <select
                 id="status"
                 value={taskStatus}
-                onChange={(e) => setTaskStatus(e.target.value as EventTaskItem["status"])}
+                onChange={(e) =>
+                  setTaskStatus(e.target.value as EventTaskItem["status"])
+                }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 {STATUS_OPTIONS.map((o) => (
@@ -221,11 +238,15 @@ export function TaskForm({
               </select>
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="priority" className="text-sm font-medium">Priority</label>
+              <label htmlFor="priority" className="text-sm font-medium">
+                Priority
+              </label>
               <select
                 id="priority"
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as EventTaskItem["priority"])}
+                onChange={(e) =>
+                  setPriority(e.target.value as EventTaskItem["priority"])
+                }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 {PRIORITY_OPTIONS.map((o) => (
@@ -257,7 +278,9 @@ export function TaskForm({
               {assigneeDropdownOpen && (
                 <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
                   {users.length === 0 ? (
-                    <p className="px-3 py-2 text-xs text-muted-foreground">No users found</p>
+                    <p className="px-3 py-2 text-xs text-muted-foreground">
+                      No users found
+                    </p>
                   ) : (
                     <ul className="max-h-48 overflow-y-auto py-1">
                       {users.map((u) => {
@@ -310,7 +333,9 @@ export function TaskForm({
 
           {/* Due date */}
           <div className="space-y-1.5">
-            <label htmlFor="due_date" className="text-sm font-medium">Due Date</label>
+            <label htmlFor="due_date" className="text-sm font-medium">
+              Due Date
+            </label>
             <Input
               id="due_date"
               type="date"
@@ -321,7 +346,9 @@ export function TaskForm({
 
           {/* Labels */}
           <div className="space-y-1.5">
-            <label htmlFor="labels" className="text-sm font-medium">Labels</label>
+            <label htmlFor="labels" className="text-sm font-medium">
+              Labels
+            </label>
             <Input
               id="labels"
               value={labelsRaw}

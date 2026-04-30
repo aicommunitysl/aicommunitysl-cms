@@ -19,12 +19,14 @@ export default async function EventTasksPage() {
 
   const [tasksData, eventsData, usersData] = await Promise.all([
     fetchEventTasks(token, {}).catch(() => ({ tasks: [], total: 0 })),
-    apiRequest<EventsListResponse>("/api/v1/events", { token }).catch(
-      () => ({ events: [], total: 0 }),
-    ),
-    apiRequest<UsersListResponse>("/api/v1/users", { token }).catch(
-      () => ({ users: [], total: 0 }),
-    ),
+    apiRequest<EventsListResponse>("/api/v1/events", { token }).catch(() => ({
+      events: [],
+      total: 0,
+    })),
+    apiRequest<UsersListResponse>("/api/v1/users", { token }).catch(() => ({
+      users: [],
+      total: 0,
+    })),
   ]);
 
   return (

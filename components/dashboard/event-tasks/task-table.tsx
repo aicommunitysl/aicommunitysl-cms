@@ -5,7 +5,8 @@ import type { EventTaskItem } from "@/lib/types";
 
 const STATUS_BADGE: Record<string, string> = {
   todo: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-  in_progress: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  in_progress:
+    "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   review:
     "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
   done: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
@@ -82,10 +83,7 @@ export function TaskTable({ tasks, onEdit, onDelete }: TaskTableProps) {
               new Date(task.due_date) < new Date();
 
             return (
-              <tr
-                key={task.id}
-                className="hover:bg-muted/30 transition-colors"
-              >
+              <tr key={task.id} className="hover:bg-muted/30 transition-colors">
                 {/* Task title + labels */}
                 <td className="max-w-xs px-4 py-3">
                   <p className="font-medium truncate">{task.title}</p>
