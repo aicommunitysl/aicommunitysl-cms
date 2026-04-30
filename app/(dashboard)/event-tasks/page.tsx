@@ -9,7 +9,7 @@ interface EventsListResponse {
 }
 
 interface TeamListResponse {
-  team: TeamMemberItem[];
+  members: TeamMemberItem[];
   total: number;
 }
 
@@ -43,7 +43,7 @@ export default async function EventTasksPage() {
       <EventTasksManager
         initialTasks={tasksData.tasks}
         events={eventsData.events}
-        teamMembers={teamData.team}
+        teamMembers={teamData.members}
         token={token}
       />
     </div>
