@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { KanbanSquare, LayoutList, Plus, Search } from "lucide-react";
+import { CalendarDays, KanbanSquare, LayoutList, Plus, Search } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -50,15 +50,48 @@ export function EventTasksManager({
   const [defaultFormStatus, setDefaultFormStatus] =
     useState<TaskStatus>("todo");
 
-  // Filters
+  // Primary grouping: event tab
   const [selectedEventId, setSelectedEventId] = useState("");
+  // Secondary filters (within the active event tab)
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Tasks scoped to the active event tab (before secondary filters)
+  const eventScopedTasks = useMemo(
+    () =>
+      selectedEventId
+        ? tasks.filter((t) => t.event_id === selectedEventId)
+        : tasks,
+    [tasks, selectedEventId],
+  );
+
+  // Stats scoped to active event tab (so the count cards reflect the current tab)
+  const stats = useMemo(() => {
+    const counts: Record<string, number> = {
+      todo: 0,
+      in_progress: 0,
+      review: 0,
+      done: 0,
+    };
+    eventScopedTasks.forEach((t) => {
+      counts[t.status] = (counts[t.status] ?? 0) + 1;
+    });
+    return counts;
+  }, [eventScopedTasks]);
+
+  // Task count per event for tab badges
+  const countByEvent = useMemo(() => {
+    const map: Record<string, number> = {};
+    tasks.forEach((t) => {
+      map[t.event_id] = (map[t.event_id] ?? 0) + 1;
+    });
+    return map;
+  }, [tasks]);
+
+  // Final filtered tasks shown in board/table
   const filteredTasks = useMemo(() => {
-    return tasks.filter((t) => {
-      if (selectedEventId && t.event_id !== selectedEventId) return false;
+    return eventScopedTasks.filter((t) => {
       if (statusFilter && t.status !== statusFilter) return false;
       if (priorityFilter && t.priority !== priorityFilter) return false;
       if (searchQuery) {
@@ -74,7 +107,15 @@ export function EventTasksManager({
       }
       return true;
     });
-  }, [tasks, selectedEventId, statusFilter, priorityFilter, searchQuery]);
+  }, [eventScopedTasks, statusFilter, priorityFilter, searchQuery]);
+
+  function selectEvent(id: string) {
+    setSelectedEventId(id);
+    // Reset secondary filters when switching events
+    setStatusFilter("");
+    setPriorityFilter("");
+    setSearchQuery("");
+  }
 
   function openNewTask(status: TaskStatus = "todo") {
     setEditingTask(null);
@@ -106,27 +147,69 @@ export function EventTasksManager({
       toast.success("Task deleted");
     } catch {
       toast.error("Failed to delete task");
-      // rollback not possible here without the old list; user can refresh
     }
   }
 
-  // Stats summary
-  const stats = useMemo(() => {
-    const counts: Record<string, number> = {
-      todo: 0,
-      in_progress: 0,
-      review: 0,
-      done: 0,
-    };
-    tasks.forEach((t) => {
-      counts[t.status] = (counts[t.status] ?? 0) + 1;
-    });
-    return counts;
-  }, [tasks]);
+  const activeEvent = events.find((e) => e.id === selectedEventId);
 
   return (
-    <div className="space-y-6">
-      {/* Stats bar */}
+    <div className="space-y-5">
+      {/* ── Event tab strip ── */}
+      <div className="relative">
+        <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none border-b border-border">
+          {/* "All Events" tab */}
+          <button
+            onClick={() => selectEvent("")}
+            className={`flex shrink-0 items-center gap-1.5 rounded-t-lg px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+              selectedEventId === ""
+                ? "border-b-2 border-primary text-primary -mb-px bg-card"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            <CalendarDays className="h-3.5 w-3.5" />
+            All Events
+            <span
+              className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                selectedEventId === ""
+                  ? "bg-primary/15 text-primary"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {tasks.length}
+            </span>
+          </button>
+
+          {/* One tab per event */}
+          {events.map((ev) => {
+            const isActive = selectedEventId === ev.id;
+            const count = countByEvent[ev.id] ?? 0;
+            return (
+              <button
+                key={ev.id}
+                onClick={() => selectEvent(ev.id)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-t-lg px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none max-w-56 ${
+                  isActive
+                    ? "border-b-2 border-primary text-primary -mb-px bg-card"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <span className="truncate">{ev.title}</span>
+                <span
+                  className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                    isActive
+                      ? "bg-primary/15 text-primary"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Stats bar (scoped to active event tab) ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { key: "todo", label: "To Do", color: "text-slate-500" },
@@ -136,7 +219,11 @@ export function EventTasksManager({
         ].map((s) => (
           <div
             key={s.key}
-            className="rounded-xl border border-border bg-card px-4 py-3 cursor-pointer hover:bg-muted/40 transition-colors"
+            className={`rounded-xl border bg-card px-4 py-3 cursor-pointer hover:bg-muted/40 transition-colors ${
+              statusFilter === s.key
+                ? "border-primary/50 ring-1 ring-primary/30"
+                : "border-border"
+            }`}
             onClick={() =>
               setStatusFilter((prev) => (prev === s.key ? "" : s.key))
             }
@@ -149,36 +236,24 @@ export function EventTasksManager({
         ))}
       </div>
 
-      {/* Toolbar */}
+      {/* ── Toolbar: secondary filters + view toggle ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Left: search + filters */}
+        {/* Left: search + status + priority */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search tasks…"
-              className="pl-8 w-44 text-sm h-9"
+              placeholder={
+                activeEvent
+                  ? `Search in "${activeEvent.title}"…`
+                  : "Search tasks…"
+              }
+              className="pl-8 w-52 text-sm h-9"
             />
           </div>
 
-          {/* Event filter */}
-          <select
-            value={selectedEventId}
-            onChange={(e) => setSelectedEventId(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="">All Events</option>
-            {events.map((ev) => (
-              <option key={ev.id} value={ev.id}>
-                {ev.title}
-              </option>
-            ))}
-          </select>
-
-          {/* Status filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -191,7 +266,6 @@ export function EventTasksManager({
             ))}
           </select>
 
-          {/* Priority filter */}
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
@@ -204,13 +278,11 @@ export function EventTasksManager({
             ))}
           </select>
 
-          {/* Clear filters */}
-          {(selectedEventId || statusFilter || priorityFilter || searchQuery) && (
+          {(statusFilter || priorityFilter || searchQuery) && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                setSelectedEventId("");
                 setStatusFilter("");
                 setPriorityFilter("");
                 setSearchQuery("");
@@ -224,7 +296,6 @@ export function EventTasksManager({
 
         {/* Right: view toggle + new task */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* View toggle */}
           <div className="flex rounded-lg border border-border overflow-hidden">
             <button
               onClick={() => setView("kanban")}
@@ -249,7 +320,7 @@ export function EventTasksManager({
         </div>
       </div>
 
-      {/* Content */}
+      {/* ── Content ── */}
       {view === "kanban" ? (
         <TaskBoard
           token={token}
@@ -257,7 +328,17 @@ export function EventTasksManager({
           onEdit={openEditTask}
           onDelete={handleDelete}
           onNewTask={openNewTask}
-          onTasksChange={setTasks}
+          onTasksChange={(updated) => {
+            // Merge updated event-scoped tasks back into the full list
+            if (selectedEventId) {
+              setTasks((prev) => [
+                ...prev.filter((t) => t.event_id !== selectedEventId),
+                ...updated,
+              ]);
+            } else {
+              setTasks(updated);
+            }
+          }}
         />
       ) : (
         <TaskTable
