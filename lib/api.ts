@@ -1,4 +1,9 @@
 import { serverEnv } from "@/lib/env";
+import type {
+  EventTaskItem,
+  EventTaskListResponse,
+  SubTaskItem,
+} from "@/lib/types";
 
 interface RequestOptions extends Omit<RequestInit, "body"> {
   token?: string;
@@ -80,3 +85,77 @@ export function getResourcePath(resource: string) {
 
   return resolved;
 }
+
+// ---------------------------------------------------------------------------
+// Event Tasks API
+// ---------------------------------------------------------------------------
+
+export const EVENT_TASKS_PATH = "/api/v1/event-tasks";
+
+export async function fetchEventTasks(
+  token: string,
+  filters: {
+    event_id?: string;
+    status?: string;
+    priority?: string;
+    assignee?: string;
+  } = {},
+): Promise<EventTaskListResponse> {
+  const params = new URLSearchParams();
+  if (filters.event_id) params.set("event_id", filters.event_id);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.priority) params.set("priority", filters.priority);
+  if (filters.assignee) params.set("assignee", filters.assignee);
+  params.set("limit", "200");
+  return apiRequest<EventTaskListResponse>(EVENT_TASKS_PATH, {
+    token,
+    searchParams: params,
+  });
+}
+
+export async function createEventTask(
+  token: string,
+  payload: Omit<EventTaskItem, "id" | "created_at" | "updated_at">,
+): Promise<EventTaskItem> {
+  return apiRequest<EventTaskItem>(EVENT_TASKS_PATH, {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function updateEventTask(
+  token: string,
+  taskId: string,
+  payload: Partial<Omit<EventTaskItem, "id" | "created_at" | "updated_at">>,
+): Promise<EventTaskItem> {
+  return apiRequest<EventTaskItem>(`${EVENT_TASKS_PATH}/${taskId}`, {
+    method: "PUT",
+    token,
+    body: payload,
+  });
+}
+
+export async function updateTaskStatus(
+  token: string,
+  taskId: string,
+  newStatus: string,
+): Promise<EventTaskItem> {
+  return apiRequest<EventTaskItem>(`${EVENT_TASKS_PATH}/${taskId}/status`, {
+    method: "PATCH",
+    token,
+    body: { status: newStatus },
+  });
+}
+
+export async function deleteEventTask(
+  token: string,
+  taskId: string,
+): Promise<void> {
+  return apiRequest<void>(`${EVENT_TASKS_PATH}/${taskId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export type { EventTaskItem, SubTaskItem };

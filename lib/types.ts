@@ -162,3 +162,38 @@ export interface ListEnvelope<T> {
   total: number;
   items: T[];
 }
+
+// ---------------------------------------------------------------------------
+// Event Tasks
+// ---------------------------------------------------------------------------
+
+export type TaskStatus = "todo" | "in_progress" | "review" | "done";
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
+
+export interface SubTaskItem {
+  id: string;
+  title: string;
+  is_done: boolean;
+  assignee_name?: string;
+}
+
+export interface EventTaskItem {
+  id: string;
+  event_id: string;
+  event_title?: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  assignees: string[];
+  due_date?: string;
+  labels: string[];
+  subtasks: SubTaskItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventTaskListResponse {
+  total: number;
+  tasks: EventTaskItem[];
+}

@@ -6,6 +6,7 @@ import {
   Handshake,
   Home,
   Inbox,
+  KanbanSquare,
   Milestone,
   Radio,
   Sparkles,
@@ -41,6 +42,7 @@ export const navigationItems: Array<{
 }> = [
   { href: "/", label: "Overview", icon: Home },
   { href: "/events", label: "Events", icon: CalendarDays },
+  { href: "/event-tasks", label: "Event Tasks", icon: KanbanSquare },
   { href: "/partners", label: "Partners", icon: Handshake },
   { href: "/team", label: "Team", icon: Users },
   { href: "/milestones", label: "Milestones", icon: Milestone },
