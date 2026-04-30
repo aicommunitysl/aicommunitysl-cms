@@ -12,12 +12,16 @@ export type FieldType =
   | "email"
   | "url"
   | "number"
+  | "date"
+  | "time"
   | "checkbox"
   | "datetime-local"
   | "select"
   | "multiline-list"
   | "json"
-  | "image";
+  | "image"
+  | "speaker-list"
+  | "session-list";
 
 export interface ResourceField {
   name: string;
@@ -118,13 +122,32 @@ export const resourceConfigs: {
         required: true,
       },
       {
-        name: "date",
+        name: "event_date",
         label: "Event date",
-        type: "datetime-local",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "event_time",
+        label: "Event time",
+        type: "time",
         required: true,
       },
       { name: "location", label: "Location", type: "text", required: true },
-      { name: "event_type", label: "Type", type: "text", required: true },
+      {
+        name: "event_type",
+        label: "Type",
+        type: "select",
+        required: true,
+        options: [
+          { label: "Workshop", value: "workshop" },
+          { label: "Conference", value: "conference" },
+          { label: "Meetup", value: "meetup" },
+          { label: "Panel", value: "panel" },
+          { label: "Hackathon", value: "hackathon" },
+          { label: "Bootcamp", value: "bootcamp" },
+        ],
+      },
       { name: "image_url", label: "Image", type: "image" },
       { name: "registration_url", label: "Registration URL", type: "url" },
       {
@@ -137,17 +160,13 @@ export const resourceConfigs: {
       { name: "is_published", label: "Published", type: "checkbox" },
       {
         name: "speakers",
-        label: "Speakers JSON",
-        type: "json",
-        description:
-          '[{"name":"Speaker","role":"Lead","image_url":"https://..."}]',
+        label: "Speakers",
+        type: "speaker-list",
       },
       {
         name: "sessions",
-        label: "Sessions JSON",
-        type: "json",
-        description:
-          '[{"title":"Opening","time":"09:00","speaker":"Name","description":"..."}]',
+        label: "Sessions",
+        type: "session-list",
       },
     ],
     columns: [
@@ -176,44 +195,56 @@ export const resourceConfigs: {
     defaultValues: {
       title: "",
       description: "",
-      date: "",
+      event_date: "",
+      event_time: "",
       location: "",
-      event_type: "",
+      event_type: "meetup",
       image_url: "",
       registration_url: "",
       tags: "",
       max_participants: "",
       is_published: false,
-      speakers: "[]",
-      sessions: "[]",
+      speakers: [],
+      sessions: [],
     },
     getCreatePayload: (values) => ({
       ...values,
-      date: values.date,
+      date:
+        values.event_date && values.event_time
+          ? `${String(values.event_date)}T${String(values.event_time)}:00`
+          : values.event_date,
+      event_date: undefined,
+      event_time: undefined,
       tags: parseMultiline(values.tags),
       max_participants: values.max_participants
         ? Number(values.max_participants)
         : undefined,
-      speakers: parseJSONValue(values.speakers, []),
-      sessions: parseJSONValue(values.sessions, []),
+      speakers: Array.isArray(values.speakers) ? values.speakers : [],
+      sessions: Array.isArray(values.sessions) ? values.sessions : [],
     }),
     getUpdatePayload: (values) => ({
       ...values,
-      date: values.date,
+      date:
+        values.event_date && values.event_time
+          ? `${String(values.event_date)}T${String(values.event_time)}:00`
+          : values.event_date,
+      event_date: undefined,
+      event_time: undefined,
       tags: parseMultiline(values.tags),
       max_participants: values.max_participants
         ? Number(values.max_participants)
         : null,
-      speakers: parseJSONValue(values.speakers, []),
-      sessions: parseJSONValue(values.sessions, []),
+      speakers: Array.isArray(values.speakers) ? values.speakers : [],
+      sessions: Array.isArray(values.sessions) ? values.sessions : [],
     }),
     prepareFormValues: (item) => ({
       ...item,
-      date: item.date ? item.date.slice(0, 16) : "",
+      event_date: item.date ? item.date.slice(0, 10) : "",
+      event_time: item.date ? item.date.slice(11, 16) : "",
       tags: item.tags.join("\n"),
       max_participants: item.max_participants ?? "",
-      speakers: stringifyJSON(item.speakers),
-      sessions: stringifyJSON(item.sessions),
+      speakers: item.speakers ?? [],
+      sessions: item.sessions ?? [],
     }),
   },
   partners: {
