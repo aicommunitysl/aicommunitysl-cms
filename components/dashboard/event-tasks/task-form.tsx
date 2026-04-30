@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Plus, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import type { EventItem, EventTaskItem, SubTaskItem } from "@/lib/types";
+import type { EventItem, EventTaskItem, SubTaskItem, UserItem } from "@/lib/types";
 import { createEventTask, updateEventTask } from "@/lib/api";
 
 interface TaskFormProps {
   token: string;
   events: EventItem[];
+  users: UserItem[];
   task?: EventTaskItem | null;
   defaultEventId?: string;
   onSave: (task: EventTaskItem) => void;
@@ -36,6 +36,7 @@ const PRIORITY_OPTIONS = [
 export function TaskForm({
   token,
   events,
+  users,
   task,
   defaultEventId,
   onSave,
@@ -50,9 +51,9 @@ export function TaskForm({
   const [description, setDescription] = useState(task?.description ?? "");
   const [taskStatus, setTaskStatus] = useState(task?.status ?? "todo");
   const [priority, setPriority] = useState(task?.priority ?? "medium");
-  const [assigneesRaw, setAssigneesRaw] = useState(
-    (task?.assignees ?? []).join(", "),
-  );
+  const [assignees, setAssignees] = useState<string[]>(task?.assignees ?? []);
+  const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
+  const assigneeRef = useRef<HTMLDivElement>(null);
   const [labelsRaw, setLabelsRaw] = useState((task?.labels ?? []).join(", "));
   const [dueDate, setDueDate] = useState(
     task?.due_date ? task.due_date.slice(0, 10) : "",
@@ -98,10 +99,6 @@ export function TaskForm({
       return;
     }
 
-    const assignees = assigneesRaw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
     const labels = labelsRaw
       .split(",")
       .map((s) => s.trim())
@@ -164,7 +161,7 @@ export function TaskForm({
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-5 p-6">
           {/* Event selector */}
           <div className="space-y-1.5">
-            <Label htmlFor="event">Event</Label>
+            <label htmlFor="event" className="text-sm font-medium">Event</label>
             <select
               id="event"
               value={eventId}
@@ -181,9 +178,9 @@ export function TaskForm({
 
           {/* Title */}
           <div className="space-y-1.5">
-            <Label htmlFor="title">
+            <label htmlFor="title" className="text-sm font-medium">
               Title <span className="text-destructive">*</span>
-            </Label>
+            </label>
             <Input
               id="title"
               value={title}
@@ -195,7 +192,7 @@ export function TaskForm({
 
           {/* Description */}
           <div className="space-y-1.5">
-            <Label htmlFor="description">Description</Label>
+            <label htmlFor="description" className="text-sm font-medium">Description</label>
             <textarea
               id="description"
               value={description}
@@ -209,7 +206,7 @@ export function TaskForm({
           {/* Status + Priority */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="status">Status</Label>
+              <label htmlFor="status" className="text-sm font-medium">Status</label>
               <select
                 id="status"
                 value={taskStatus}
@@ -224,7 +221,7 @@ export function TaskForm({
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="priority">Priority</Label>
+              <label htmlFor="priority" className="text-sm font-medium">Priority</label>
               <select
                 id="priority"
                 value={priority}
@@ -241,19 +238,79 @@ export function TaskForm({
           </div>
 
           {/* Assignees */}
-          <div className="space-y-1.5">
-            <Label htmlFor="assignees">Assignees</Label>
-            <Input
-              id="assignees"
-              value={assigneesRaw}
-              onChange={(e) => setAssigneesRaw(e.target.value)}
-              placeholder="John, Jane, Kasun (comma separated)"
-            />
+          <div className="space-y-1.5" ref={assigneeRef}>
+            <label className="text-sm font-medium">Assignees</label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setAssigneeDropdownOpen((o) => !o)}
+                className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <span className="truncate text-left">
+                  {assignees.length === 0
+                    ? "Select assignees…"
+                    : assignees.join(", ")}
+                </span>
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+              </button>
+
+              {assigneeDropdownOpen && (
+                <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
+                  {users.length === 0 ? (
+                    <p className="px-3 py-2 text-xs text-muted-foreground">No users found</p>
+                  ) : (
+                    <ul className="max-h-48 overflow-y-auto py-1">
+                      {users.map((u) => {
+                        const selected = assignees.includes(u.email);
+                        return (
+                          <li key={u.id}>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAssignees((prev) =>
+                                  selected
+                                    ? prev.filter((a) => a !== u.email)
+                                    : [...prev, u.email],
+                                )
+                              }
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
+                            >
+                              <span
+                                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                                  selected
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-input"
+                                }`}
+                              >
+                                {selected && <Check className="h-2.5 w-2.5" />}
+                              </span>
+                              <span className="truncate">{u.email}</span>
+                              <span className="ml-auto text-xs text-muted-foreground capitalize">
+                                {u.role}
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                  <div className="border-t border-border px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setAssigneeDropdownOpen(false)}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Due date */}
           <div className="space-y-1.5">
-            <Label htmlFor="due_date">Due Date</Label>
+            <label htmlFor="due_date" className="text-sm font-medium">Due Date</label>
             <Input
               id="due_date"
               type="date"
@@ -264,7 +321,7 @@ export function TaskForm({
 
           {/* Labels */}
           <div className="space-y-1.5">
-            <Label htmlFor="labels">Labels</Label>
+            <label htmlFor="labels" className="text-sm font-medium">Labels</label>
             <Input
               id="labels"
               value={labelsRaw}
@@ -275,7 +332,7 @@ export function TaskForm({
 
           {/* Subtasks */}
           <div className="space-y-2">
-            <Label>Subtasks</Label>
+            <label className="text-sm font-medium">Subtasks</label>
             <div className="space-y-1.5">
               {subtasks.map((st) => (
                 <div

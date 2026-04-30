@@ -1,10 +1,15 @@
 import { EventTasksManager } from "@/components/dashboard/event-tasks/event-tasks-manager";
 import { apiRequest, fetchEventTasks } from "@/lib/api";
 import { requireUser, getAuthToken } from "@/lib/session";
-import type { EventItem } from "@/lib/types";
+import type { EventItem, UserItem } from "@/lib/types";
 
 interface EventsListResponse {
   events: EventItem[];
+  total: number;
+}
+
+interface UsersListResponse {
+  users: UserItem[];
   total: number;
 }
 
@@ -12,10 +17,13 @@ export default async function EventTasksPage() {
   await requireUser();
   const token = (await getAuthToken()) ?? "";
 
-  const [tasksData, eventsData] = await Promise.all([
+  const [tasksData, eventsData, usersData] = await Promise.all([
     fetchEventTasks(token, {}).catch(() => ({ tasks: [], total: 0 })),
     apiRequest<EventsListResponse>("/api/v1/events", { token }).catch(
       () => ({ events: [], total: 0 }),
+    ),
+    apiRequest<UsersListResponse>("/api/v1/users", { token }).catch(
+      () => ({ users: [], total: 0 }),
     ),
   ]);
 
@@ -33,6 +41,7 @@ export default async function EventTasksPage() {
       <EventTasksManager
         initialTasks={tasksData.tasks}
         events={eventsData.events}
+        users={usersData.users}
         token={token}
       />
     </div>

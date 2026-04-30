@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { TaskBoard } from "./task-board";
 import { TaskTable } from "./task-table";
 import { TaskForm } from "./task-form";
-import type { EventItem, EventTaskItem, TaskStatus } from "@/lib/types";
+import type { EventItem, EventTaskItem, TaskStatus, UserItem } from "@/lib/types";
 import { deleteEventTask } from "@/lib/api";
 
 type View = "kanban" | "table";
@@ -33,12 +33,14 @@ const PRIORITY_FILTER_OPTIONS = [
 interface EventTasksManagerProps {
   initialTasks: EventTaskItem[];
   events: EventItem[];
+  users: UserItem[];
   token: string;
 }
 
 export function EventTasksManager({
   initialTasks,
   events,
+  users,
   token,
 }: EventTasksManagerProps) {
   const [view, setView] = useState<View>("kanban");
@@ -270,6 +272,7 @@ export function EventTasksManager({
         <TaskForm
           token={token}
           events={events}
+          users={users}
           task={editingTask}
           defaultEventId={selectedEventId || undefined}
           onSave={handleSaved}
