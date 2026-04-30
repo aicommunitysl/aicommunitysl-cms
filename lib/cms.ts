@@ -2,6 +2,7 @@ import type {
   ContentPageItem,
   ContactMessageItem,
   EventItem,
+  EventTaskItem,
   ListEnvelope,
   MilestoneItem,
   PartnerItem,
@@ -21,6 +22,7 @@ export const listKeyMap: Record<string, string> = {
   social: "links",
   speakers: "applications",
   users: "users",
+  "event-tasks": "tasks",
 };
 
 export const resourceKeys = Object.keys(listKeyMap) as Array<
@@ -55,4 +57,5 @@ export type ResourceItemMap = {
   social: SocialLinkItem;
   speakers: SpeakerApplicationItem;
   users: UserItem;
+  "event-tasks": EventTaskItem;
 };
