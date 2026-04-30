@@ -20,8 +20,11 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   resourceConfigs,
+  socialLinksArrayToObject,
+  socialLinksObjectToArray,
   type ResourceConfig,
   type ResourceField,
+  type SocialLinkEntry,
 } from "@/lib/resource-config";
 import type { ResourceItemMap } from "@/lib/cms";
 import type { SessionUser } from "@/lib/types";
@@ -265,6 +268,90 @@ function SessionListField({
   );
 }
 
+const COMMON_PLATFORMS = [
+  "linkedin",
+  "github",
+  "twitter",
+  "instagram",
+  "facebook",
+  "youtube",
+  "website",
+  "other",
+];
+
+function SocialLinksField({
+  value,
+  onChange,
+}: {
+  value: unknown;
+  onChange: (entries: SocialLinkEntry[]) => void;
+}) {
+  const raw = Array.isArray(value) ? (value as SocialLinkEntry[]) : [];
+  const entries: SocialLinkEntry[] =
+    raw.length > 0
+      ? raw
+      : typeof value === "object" && value !== null && !Array.isArray(value)
+        ? socialLinksObjectToArray(value as Record<string, string>)
+        : [];
+
+  function update(index: number, field: keyof SocialLinkEntry, val: string) {
+    onChange(entries.map((e, i) => (i === index ? { ...e, [field]: val } : e)));
+  }
+
+  function add() {
+    onChange([...entries, { platform: "", url: "" }]);
+  }
+
+  function remove(index: number) {
+    onChange(entries.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div className="space-y-3">
+      {entries.map((entry, index) => (
+        <div
+          key={index}
+          className="relative flex items-center gap-2 rounded-2xl border border-border/60 bg-card/60 px-4 py-3"
+        >
+          <select
+            value={entry.platform}
+            onChange={(e) => update(index, "platform", e.target.value)}
+            className="h-9 w-36 shrink-0 rounded-xl border border-input bg-background px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="">Platform…</option>
+            {COMMON_PLATFORMS.map((p) => (
+              <option key={p} value={p}>
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </option>
+            ))}
+          </select>
+          <Input
+            value={entry.url ?? ""}
+            placeholder="https://…"
+            onChange={(e) => update(index, "url", e.target.value)}
+            className="flex-1"
+          />
+          <button
+            type="button"
+            onClick={() => remove(index)}
+            className="ml-1 shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground transition hover:border-foreground/40 hover:text-foreground"
+      >
+        <Plus className="h-4 w-4" />
+        Add social link
+      </button>
+    </div>
+  );
+}
+
 function defaultPrepareValues(item: ResourceRecord) {
   return { ...item };
 }
@@ -283,7 +370,8 @@ function fieldSpanClass(field: ResourceField) {
     field.type === "multiline-list" ||
     field.type === "image" ||
     field.type === "speaker-list" ||
-    field.type === "session-list"
+    field.type === "session-list" ||
+    field.type === "social-links"
     ? "md:col-span-2"
     : "";
 }
@@ -352,34 +440,54 @@ function renderField(
   }
 
   if (field.type === "image") {
+    const imageUrl = String(normalizeValue(value));
+    const hasImage = imageUrl.startsWith("http");
     return (
       <div>
-        <div className="flex flex-col gap-3 md:flex-row">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <Input
             required={field.required}
-            value={String(normalizeValue(value))}
+            value={imageUrl}
             placeholder={field.placeholder || "https://..."}
             onChange={(event) => onChange(field.name, event.target.value)}
           />
-          <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card px-4 text-sm font-medium text-foreground transition hover:bg-muted">
-            {imageUploadingField === field.name ? (
-              <LoaderCircle className="h-4 w-4 animate-spin" />
-            ) : (
-              <UploadCloud className="h-4 w-4" />
+          <div className="flex shrink-0 items-center gap-2">
+            <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card px-4 text-sm font-medium text-foreground transition hover:bg-muted">
+              {imageUploadingField === field.name ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <UploadCloud className="h-4 w-4" />
+              )}
+              Upload
+              <input
+                className="hidden"
+                type="file"
+                accept="image/*"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) {
+                    void onImageUpload(field.name, file);
+                  }
+                }}
+              />
+            </label>
+            {hasImage && (
+              <a
+                href={imageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open full image"
+                className="group relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-border/60 transition hover:border-primary/60 hover:ring-2 hover:ring-primary/30"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="h-full w-full object-cover transition group-hover:scale-110"
+                />
+              </a>
             )}
-            Upload
-            <input
-              className="hidden"
-              type="file"
-              accept="image/*"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) {
-                  void onImageUpload(field.name, file);
-                }
-              }}
-            />
-          </label>
+          </div>
         </div>
         {sharedDescription}
       </div>
@@ -398,6 +506,15 @@ function renderField(
   if (field.type === "session-list") {
     return (
       <SessionListField
+        value={value}
+        onChange={(entries) => onChange(field.name, entries)}
+      />
+    );
+  }
+
+  if (field.type === "social-links") {
+    return (
+      <SocialLinksField
         value={value}
         onChange={(entries) => onChange(field.name, entries)}
       />
