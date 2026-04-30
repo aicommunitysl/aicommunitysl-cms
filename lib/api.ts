@@ -21,6 +21,7 @@ export const resourcePathMap: Record<string, string> = {
   social: "/api/v1/social",
   speakers: "/api/v1/speakers",
   users: "/api/v1/users",
+  "event-tasks": "/api/v1/event-tasks",
 };
 
 function buildHeaders(body?: BodyInit | object, token?: string) {
