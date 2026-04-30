@@ -10,14 +10,14 @@ import type {
   EventItem,
   EventTaskItem,
   SubTaskItem,
-  UserItem,
+  TeamMemberItem,
 } from "@/lib/types";
 import { createEventTask, updateEventTask } from "@/lib/api";
 
 interface TaskFormProps {
   token: string;
   events: EventItem[];
-  users: UserItem[];
+  teamMembers: TeamMemberItem[];
   task?: EventTaskItem | null;
   defaultEventId?: string;
   onSave: (task: EventTaskItem) => void;
@@ -41,7 +41,7 @@ const PRIORITY_OPTIONS = [
 export function TaskForm({
   token,
   events,
-  users,
+  teamMembers,
   task,
   defaultEventId,
   onSave,
@@ -277,23 +277,23 @@ export function TaskForm({
 
               {assigneeDropdownOpen && (
                 <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
-                  {users.length === 0 ? (
+                  {teamMembers.length === 0 ? (
                     <p className="px-3 py-2 text-xs text-muted-foreground">
-                      No users found
+                      No team members found
                     </p>
                   ) : (
                     <ul className="max-h-48 overflow-y-auto py-1">
-                      {users.map((u) => {
-                        const selected = assignees.includes(u.email);
+                      {teamMembers.map((member) => {
+                        const selected = assignees.includes(member.name);
                         return (
-                          <li key={u.id}>
+                          <li key={member.id}>
                             <button
                               type="button"
                               onClick={() =>
                                 setAssignees((prev) =>
                                   selected
-                                    ? prev.filter((a) => a !== u.email)
-                                    : [...prev, u.email],
+                                    ? prev.filter((a) => a !== member.name)
+                                    : [...prev, member.name],
                                 )
                               }
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
@@ -307,9 +307,9 @@ export function TaskForm({
                               >
                                 {selected && <Check className="h-2.5 w-2.5" />}
                               </span>
-                              <span className="truncate">{u.email}</span>
+                              <span className="truncate">{member.name}</span>
                               <span className="ml-auto text-xs text-muted-foreground capitalize">
-                                {u.role}
+                                {member.role}
                               </span>
                             </button>
                           </li>

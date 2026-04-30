@@ -19,7 +19,7 @@ import type {
   EventItem,
   EventTaskItem,
   TaskStatus,
-  UserItem,
+  TeamMemberItem,
 } from "@/lib/types";
 import { deleteEventTask } from "@/lib/api";
 
@@ -44,14 +44,14 @@ const PRIORITY_FILTER_OPTIONS = [
 interface EventTasksManagerProps {
   initialTasks: EventTaskItem[];
   events: EventItem[];
-  users: UserItem[];
+  teamMembers: TeamMemberItem[];
   token: string;
 }
 
 export function EventTasksManager({
   initialTasks,
   events,
-  users,
+  teamMembers,
   token,
 }: EventTasksManagerProps) {
   const [view, setView] = useState<View>("kanban");
@@ -364,7 +364,7 @@ export function EventTasksManager({
         <TaskForm
           token={token}
           events={events}
-          users={users}
+          teamMembers={teamMembers}
           task={editingTask}
           defaultEventId={selectedEventId || undefined}
           onSave={handleSaved}

@@ -1,15 +1,15 @@
 import { EventTasksManager } from "@/components/dashboard/event-tasks/event-tasks-manager";
 import { apiRequest, fetchEventTasks } from "@/lib/api";
 import { requireUser, getAuthToken } from "@/lib/session";
-import type { EventItem, UserItem } from "@/lib/types";
+import type { EventItem, TeamMemberItem } from "@/lib/types";
 
 interface EventsListResponse {
   events: EventItem[];
   total: number;
 }
 
-interface UsersListResponse {
-  users: UserItem[];
+interface TeamListResponse {
+  team: TeamMemberItem[];
   total: number;
 }
 
@@ -17,14 +17,14 @@ export default async function EventTasksPage() {
   await requireUser();
   const token = (await getAuthToken()) ?? "";
 
-  const [tasksData, eventsData, usersData] = await Promise.all([
+  const [tasksData, eventsData, teamData] = await Promise.all([
     fetchEventTasks(token, {}).catch(() => ({ tasks: [], total: 0 })),
     apiRequest<EventsListResponse>("/api/v1/events", { token }).catch(() => ({
       events: [],
       total: 0,
     })),
-    apiRequest<UsersListResponse>("/api/v1/users", { token }).catch(() => ({
-      users: [],
+    apiRequest<TeamListResponse>("/api/v1/team", { token }).catch(() => ({
+      team: [],
       total: 0,
     })),
   ]);
@@ -43,7 +43,7 @@ export default async function EventTasksPage() {
       <EventTasksManager
         initialTasks={tasksData.tasks}
         events={eventsData.events}
-        users={usersData.users}
+        teamMembers={teamData.team}
         token={token}
       />
     </div>
