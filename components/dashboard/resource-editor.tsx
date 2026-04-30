@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useState } from "react";
 import {
   ArrowLeft,
+  ChevronDown,
+  ChevronUp,
   LoaderCircle,
   Plus,
   Trash2,
@@ -160,6 +162,14 @@ function SessionListField({
     onChange(entries.filter((_, i) => i !== index));
   }
 
+  function moveEntry(index: number, direction: "up" | "down") {
+    const next = [...entries];
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= next.length) return;
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+    onChange(next);
+  }
+
   return (
     <div className="space-y-3">
       {entries.map((entry, index) => (
@@ -167,14 +177,35 @@ function SessionListField({
           key={index}
           className="relative rounded-2xl border border-border/60 bg-card/60 p-4"
         >
-          <button
-            type="button"
-            onClick={() => removeEntry(index)}
-            className="absolute right-3 top-3 rounded-lg p-1 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-          <div className="grid gap-3 pr-8 sm:grid-cols-2">
+          <div className="absolute right-3 top-3 flex items-center gap-0.5">
+            <button
+              type="button"
+              disabled={index === 0}
+              onClick={() => moveEntry(index, "up")}
+              className="rounded-lg p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+              title="Move up"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              disabled={index === entries.length - 1}
+              onClick={() => moveEntry(index, "down")}
+              className="rounded-lg p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+              title="Move down"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => removeEntry(index)}
+              className="rounded-lg p-1 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+              title="Remove"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="grid gap-3 pr-24 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-muted-foreground">
                 Title <span className="text-destructive">*</span>
