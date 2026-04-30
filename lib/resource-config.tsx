@@ -21,7 +21,8 @@ export type FieldType =
   | "json"
   | "image"
   | "speaker-list"
-  | "session-list";
+  | "session-list"
+  | "social-links";
 
 export interface ResourceField {
   name: string;
@@ -75,6 +76,29 @@ function parseMultiline(value: unknown) {
     .split("\n")
     .map((part) => part.trim())
     .filter(Boolean);
+}
+
+export interface SocialLinkEntry {
+  platform: string;
+  url: string;
+}
+
+export function socialLinksObjectToArray(
+  obj: Record<string, string> | undefined | null,
+): SocialLinkEntry[] {
+  if (!obj || typeof obj !== "object") return [];
+  return Object.entries(obj).map(([platform, url]) => ({ platform, url }));
+}
+
+export function socialLinksArrayToObject(
+  entries: SocialLinkEntry[],
+): Record<string, string> {
+  if (!Array.isArray(entries)) return {};
+  const obj: Record<string, string> = {};
+  for (const { platform, url } of entries) {
+    if (platform.trim()) obj[platform.trim()] = url;
+  }
+  return obj;
 }
 
 function parseJSONValue(value: unknown, fallback: unknown) {
@@ -347,9 +371,8 @@ export const resourceConfigs: {
       { name: "is_active", label: "Active", type: "checkbox" },
       {
         name: "social_links",
-        label: "Social links JSON",
-        type: "json",
-        description: '{"linkedin":"https://...","github":"https://..."}',
+        label: "Social links",
+        type: "social-links",
       },
     ],
     columns: [
@@ -388,21 +411,27 @@ export const resourceConfigs: {
       email: "",
       display_order: 0,
       is_active: true,
-      social_links: "{}",
+      social_links: [],
     },
     getCreatePayload: (values) => ({
       ...values,
       display_order: Number(values.display_order || 0),
-      social_links: parseJSONValue(values.social_links, {}),
+      social_links: socialLinksArrayToObject(
+        values.social_links as SocialLinkEntry[],
+      ),
     }),
     getUpdatePayload: (values) => ({
       ...values,
       display_order: Number(values.display_order || 0),
-      social_links: parseJSONValue(values.social_links, {}),
+      social_links: socialLinksArrayToObject(
+        values.social_links as SocialLinkEntry[],
+      ),
     }),
     prepareFormValues: (item) => ({
       ...item,
-      social_links: stringifyJSON(item.social_links ?? {}),
+      social_links: socialLinksObjectToArray(
+        item.social_links as Record<string, string> | undefined,
+      ),
     }),
   },
   milestones: {
