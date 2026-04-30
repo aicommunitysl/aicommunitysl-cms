@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
@@ -48,6 +49,31 @@ export default function RootLayout({
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl transform translate-y-1/4 translate-x-1/4"></div>
           </div>
           {children}
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              style: {
+                background: "var(--card)",
+                color: "var(--card-foreground)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius)",
+                fontSize: "0.875rem",
+                fontFamily: "var(--font-geist-sans)",
+              },
+              success: {
+                iconTheme: {
+                  primary: "var(--primary)",
+                  secondary: "var(--primary-foreground)",
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: "var(--destructive)",
+                  secondary: "var(--destructive-foreground)",
+                },
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
