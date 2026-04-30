@@ -36,7 +36,7 @@ export function AppShell({
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Logo & brand */}
-      <div className="flex items-center gap-3 border-b border-border/50 px-4 py-4">
+      <div className="flex items-center gap-3 border-b border-border/50 px-5 py-4">
         <Image
           src="/logo.svg"
           alt="AICSL"
@@ -63,7 +63,7 @@ export function AppShell({
       </div>
 
       {/* Navigation */}
-      <nav className="overflow-y-auto px-3 py-3 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
         {visibleNav.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -113,7 +113,7 @@ export function AppShell({
   );
 
   return (
-    <div className="dash-grid min-h-screen">
+    <div className="dash-grid min-h-screen flex">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
@@ -132,59 +132,57 @@ export function AppShell({
         {sidebarContent}
       </aside>
 
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-3 p-3 md:gap-4 md:p-4 lg:p-5">
-        {/* Desktop sidebar */}
-        <aside className="glass-panel hidden w-56 shrink-0 flex-col rounded-2xl border border-border/50 lg:flex">
-          {sidebarContent}
-        </aside>
+      {/* Desktop sidebar — flush left, full-height sticky */}
+      <aside className="glass-panel hidden w-64 shrink-0 flex-col border-r border-border/50 h-screen sticky top-0 lg:flex">
+        {sidebarContent}
+      </aside>
 
-        {/* Main area */}
-        <div className="flex min-w-0 flex-1 flex-col gap-3 md:gap-4">
-          {/* Top header */}
-          <header className="glass-panel rounded-2xl border border-border/50 px-4 py-2.5 md:py-3">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setMobileOpen(true)}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
-                aria-label="Open menu"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
+      {/* Content column */}
+      <div className="flex min-w-0 flex-1 flex-col min-h-screen">
+        {/* Top header — full-width sticky bar */}
+        <header className="glass-panel sticky top-0 z-30 border-b border-border/50 px-6 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
 
-              <div className="flex items-center gap-2 lg:hidden">
-                <Image
-                  src="/logo.svg"
-                  alt="AICSL"
-                  width={1615}
-                  height={2938}
-                  style={{ height: 22, width: "auto" }}
-                />
-                <span className="text-sm font-semibold">AICSL CMS</span>
-              </div>
-
-              <div className="hidden lg:block">
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Admin Console
-                </div>
-                <h2 className="text-base font-semibold leading-tight">
-                  Platform operations
-                </h2>
-              </div>
-
-              <div className="ml-auto flex items-center gap-2.5">
-                <Badge
-                  tone={user.role === "admin" ? "warning" : "info"}
-                  className="hidden sm:inline-flex"
-                >
-                  {roleLabels[user.role]}
-                </Badge>
-                <ThemeToggle />
-              </div>
+            <div className="flex items-center gap-2 lg:hidden">
+              <Image
+                src="/logo.svg"
+                alt="AICSL"
+                width={1615}
+                height={2938}
+                style={{ height: 22, width: "auto" }}
+              />
+              <span className="text-sm font-semibold">AICSL CMS</span>
             </div>
-          </header>
 
-          <main className="min-w-0">{children}</main>
-        </div>
+            <div className="hidden lg:block">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Admin Console
+              </div>
+              <h2 className="text-base font-semibold leading-tight">
+                Platform operations
+              </h2>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2.5">
+              <Badge
+                tone={user.role === "admin" ? "warning" : "info"}
+                className="hidden sm:inline-flex"
+              >
+                {roleLabels[user.role]}
+              </Badge>
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 min-w-0 px-6 py-6">{children}</main>
       </div>
     </div>
   );
