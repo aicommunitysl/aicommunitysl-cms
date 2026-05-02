@@ -45,14 +45,12 @@ interface EventTasksManagerProps {
   initialTasks: EventTaskItem[];
   events: EventItem[];
   teamMembers: TeamMemberItem[];
-  token: string;
 }
 
 export function EventTasksManager({
   initialTasks,
   events,
   teamMembers,
-  token,
 }: EventTasksManagerProps) {
   const [view, setView] = useState<View>("kanban");
   const [tasks, setTasks] = useState<EventTaskItem[]>(initialTasks);
@@ -154,7 +152,7 @@ export function EventTasksManager({
     if (!confirm("Delete this task? This cannot be undone.")) return;
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
     try {
-      await deleteEventTask(token, taskId);
+      await deleteEventTask(taskId);
       toast.success("Task deleted");
     } catch {
       toast.error("Failed to delete task");
@@ -334,7 +332,6 @@ export function EventTasksManager({
       {/* ── Content ── */}
       {view === "kanban" ? (
         <TaskBoard
-          token={token}
           tasks={filteredTasks}
           onEdit={openEditTask}
           onDelete={handleDelete}
@@ -362,7 +359,6 @@ export function EventTasksManager({
       {/* Task form drawer */}
       {isFormOpen && (
         <TaskForm
-          token={token}
           events={events}
           teamMembers={teamMembers}
           task={editingTask}

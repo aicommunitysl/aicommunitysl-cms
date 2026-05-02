@@ -15,7 +15,6 @@ import type {
 import { createEventTask, updateEventTask } from "@/lib/api";
 
 interface TaskFormProps {
-  token: string;
   events: EventItem[];
   teamMembers: TeamMemberItem[];
   task?: EventTaskItem | null;
@@ -39,7 +38,6 @@ const PRIORITY_OPTIONS = [
 ];
 
 export function TaskForm({
-  token,
   events,
   teamMembers,
   task,
@@ -123,12 +121,11 @@ export function TaskForm({
     try {
       let saved: EventTaskItem;
       if (isEditing && task) {
-        saved = await updateEventTask(token, task.id, payload);
+        saved = await updateEventTask(task.id, payload);
         toast.success("Task updated successfully!");
       } else {
         saved = await createEventTask(
-          token,
-          payload as Parameters<typeof createEventTask>[1],
+          payload as Parameters<typeof createEventTask>[0],
         );
         toast.success("Task created successfully!");
       }

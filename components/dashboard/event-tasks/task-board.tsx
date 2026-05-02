@@ -32,7 +32,6 @@ const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
 ];
 
 interface TaskBoardProps {
-  token: string;
   tasks: EventTaskItem[];
   onEdit: (task: EventTaskItem) => void;
   onDelete: (taskId: string) => void;
@@ -41,7 +40,6 @@ interface TaskBoardProps {
 }
 
 export function TaskBoard({
-  token,
   tasks,
   onEdit,
   onDelete,
@@ -86,7 +84,7 @@ export function TaskBoard({
     setDraggingId(null);
 
     try {
-      await updateTaskStatus(token, draggingId, colStatus);
+      await updateTaskStatus(draggingId, colStatus);
     } catch {
       toast.error("Failed to move task");
       onTasksChange(tasks); // rollback
