@@ -114,48 +114,56 @@ export async function fetchEventTasks(
   });
 }
 
+async function proxyFetch<T>(url: string, init: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
+  if (response.status === 204) return undefined as T;
+  const data = (await response.json()) as { error?: string } & Partial<T>;
+  if (!response.ok)
+    throw new Error(
+      (data as { error?: string }).error ??
+        `${response.status} ${response.statusText}`,
+    );
+  return data as T;
+}
+
 export async function createEventTask(
-  token: string,
   payload: Omit<EventTaskItem, "id" | "created_at" | "updated_at">,
 ): Promise<EventTaskItem> {
-  return apiRequest<EventTaskItem>(EVENT_TASKS_PATH, {
+  return proxyFetch<EventTaskItem>("/api/cms/event-tasks", {
     method: "POST",
-    token,
-    body: payload,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 }
 
 export async function updateEventTask(
-  token: string,
   taskId: string,
   payload: Partial<Omit<EventTaskItem, "id" | "created_at" | "updated_at">>,
 ): Promise<EventTaskItem> {
-  return apiRequest<EventTaskItem>(`${EVENT_TASKS_PATH}/${taskId}`, {
+  return proxyFetch<EventTaskItem>(`/api/cms/event-tasks/${taskId}`, {
     method: "PUT",
-    token,
-    body: payload,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 }
 
 export async function updateTaskStatus(
-  token: string,
   taskId: string,
   newStatus: string,
 ): Promise<EventTaskItem> {
-  return apiRequest<EventTaskItem>(`${EVENT_TASKS_PATH}/${taskId}/status`, {
-    method: "PATCH",
-    token,
-    body: { status: newStatus },
-  });
+  return proxyFetch<EventTaskItem>(
+    `/api/cms/event-tasks/${taskId}/status`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    },
+  );
 }
 
-export async function deleteEventTask(
-  token: string,
-  taskId: string,
-): Promise<void> {
-  return apiRequest<void>(`${EVENT_TASKS_PATH}/${taskId}`, {
+export async function deleteEventTask(taskId: string): Promise<void> {
+  return proxyFetch<void>(`/api/cms/event-tasks/${taskId}`, {
     method: "DELETE",
-    token,
   });
 }
 
