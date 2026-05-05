@@ -24,7 +24,7 @@ export default async function EventTasksPage() {
       total: 0,
     })),
     apiRequest<TeamListResponse>("/api/v1/team", { token }).catch(() => ({
-      team: [],
+      members: [],
       total: 0,
     })),
   ]);
