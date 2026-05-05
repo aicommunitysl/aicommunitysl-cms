@@ -44,7 +44,6 @@ export default async function EventTasksPage() {
         initialTasks={tasksData.tasks}
         events={eventsData.events}
         teamMembers={teamData.members}
-        token={token}
       />
     </div>
   );
