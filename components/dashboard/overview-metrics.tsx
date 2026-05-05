@@ -1,12 +1,20 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { CalendarDays, Inbox, KanbanSquare, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import type { ListEnvelope } from "@/lib/types";
+import type { ResourceItemMap } from "@/lib/cms";
+import { getResourceItems } from "@/lib/server-cms";
 
-const cards = [
+type OverviewMetricResource = keyof Pick<
+  ResourceItemMap,
+  "events" | "team" | "event-tasks" | "contact"
+>;
+
+const cards: Array<{
+  resource: OverviewMetricResource;
+  label: string;
+  icon: typeof CalendarDays;
+  tone: "info" | "success" | "warning" | "default";
+}> = [
   {
     resource: "events",
     label: "Events",
@@ -33,50 +41,25 @@ const cards = [
   },
 ];
 
-export function OverviewMetrics() {
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [error, setError] = useState<string | null>(null);
+export async function OverviewMetrics() {
+  let counts: Record<string, number> = {};
+  let error: string | null = null;
 
-  useEffect(() => {
-    let active = true;
+  try {
+    const results = await Promise.all(
+      cards.map(async (card) => {
+        const items = await getResourceItems(card.resource);
+        return [card.resource, items.length] as const;
+      }),
+    );
 
-    async function load() {
-      try {
-        const results = await Promise.all(
-          cards.map(async (card) => {
-            const response = await fetch(`/api/cms/${card.resource}`);
-            const data = (await response.json()) as ListEnvelope<unknown> & {
-              error?: string;
-            };
-            if (!response.ok) {
-              throw new Error(data.error || `Failed to load ${card.label}`);
-            }
-            return [card.resource, data.total] as const;
-          }),
-        );
-
-        if (!active) {
-          return;
-        }
-
-        setCounts(Object.fromEntries(results));
-      } catch (loadError) {
-        if (!active) {
-          return;
-        }
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Failed to load dashboard metrics.",
-        );
-      }
-    }
-
-    void load();
-    return () => {
-      active = false;
-    };
-  }, []);
+    counts = Object.fromEntries(results);
+  } catch (loadError) {
+    error =
+      loadError instanceof Error
+        ? loadError.message
+        : "Failed to load dashboard metrics.";
+  }
 
   return (
     <section className="section-shell animate-fade-up p-5">
