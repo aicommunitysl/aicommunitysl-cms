@@ -400,7 +400,7 @@ export function TaskForm({
               <Button
                 type="button"
                 size="sm"
-                variant="outline"
+                variant="secondary"
                 onClick={addSubtask}
               >
                 <Plus className="h-4 w-4" />
@@ -413,7 +413,7 @@ export function TaskForm({
             <Button type="submit" disabled={saving} className="flex-1">
               {saving ? "Saving…" : isEditing ? "Update Task" : "Create Task"}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="secondary" onClick={onCancel}>
               Cancel
             </Button>
           </div>
