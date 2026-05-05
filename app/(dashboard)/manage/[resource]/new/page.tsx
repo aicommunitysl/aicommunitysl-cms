@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { ResourceEditor } from "@/components/dashboard/resource-editor";
-import { isResourceKey } from "@/lib/cms";
-import { resourceConfigs } from "@/lib/resource-config";
+import {
+  isConfiguredResourceKey,
+  resourceConfigs,
+} from "@/lib/resource-config";
 import { requireUser } from "@/lib/session";
 
 export default async function ResourceCreatePage({
@@ -11,7 +13,7 @@ export default async function ResourceCreatePage({
   params: Promise<{ resource: string }>;
 }) {
   const { resource } = await params;
-  if (!isResourceKey(resource)) {
+  if (!isConfiguredResourceKey(resource)) {
     notFound();
   }
 

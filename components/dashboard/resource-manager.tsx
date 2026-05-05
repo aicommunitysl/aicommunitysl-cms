@@ -14,6 +14,7 @@ import Link from "next/link";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  type ConfiguredResourceKey,
   ensureContentEntries,
   resourceConfigs,
   type ResourceConfig,
@@ -27,7 +28,7 @@ function getRecordIdentifier(record: Record<string, unknown>, key: string) {
 }
 
 function getEditHref(
-  resourceKey: keyof ResourceItemMap,
+  resourceKey: ConfiguredResourceKey,
   item: Record<string, unknown>,
   config: ResourceConfig<Record<string, unknown>>,
 ): string {
@@ -37,13 +38,13 @@ function getEditHref(
 }
 
 export function ResourceManager<
-  T extends ResourceItemMap[keyof ResourceItemMap],
+  T extends ResourceItemMap[ConfiguredResourceKey],
 >({
   resourceKey,
   initialItems,
   user,
 }: {
-  resourceKey: keyof ResourceItemMap;
+  resourceKey: ConfiguredResourceKey;
   initialItems: T[];
   user: SessionUser;
 }) {

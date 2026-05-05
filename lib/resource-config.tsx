@@ -128,8 +128,13 @@ function contentDefaults() {
   }));
 }
 
+export type ConfiguredResourceKey = Exclude<
+  keyof ResourceItemMap,
+  "event-tasks"
+>;
+
 export const resourceConfigs: {
-  [K in keyof ResourceItemMap]: ResourceConfig<ResourceItemMap[K]>;
+  [K in ConfiguredResourceKey]: ResourceConfig<ResourceItemMap[K]>;
 } = {
   events: {
     resource: "events",
@@ -877,6 +882,12 @@ export const resourceConfigs: {
     deleteEnabled: false,
   },
 };
+
+export function isConfiguredResourceKey(
+  value: string,
+): value is ConfiguredResourceKey {
+  return value in resourceConfigs;
+}
 
 export function ensureContentEntries(items: ResourceItemMap["content"][]) {
   const existing = new Map(items.map((item) => [item.slug, item]));

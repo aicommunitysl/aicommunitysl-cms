@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  type ConfiguredResourceKey,
   resourceConfigs,
   socialLinksArrayToObject,
   socialLinksObjectToArray,
@@ -544,11 +545,11 @@ export function ResourceEditor({
   recordId,
   initialItem,
 }: {
-  resourceKey: keyof ResourceItemMap;
+  resourceKey: ConfiguredResourceKey;
   user: SessionUser;
   mode: EditorMode;
   recordId?: string;
-  initialItem?: ResourceItemMap[keyof ResourceItemMap];
+  initialItem?: ResourceItemMap[ConfiguredResourceKey];
 }) {
   const router = useRouter();
   const config = resourceConfigs[
