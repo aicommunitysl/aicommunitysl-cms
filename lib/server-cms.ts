@@ -14,8 +14,10 @@ export async function getResourceItems<K extends keyof ResourceItemMap>(
 
   const path =
     resource === "users" ? "/api/v1/users" : getResourcePath(resource);
+  const searchParams = new URLSearchParams({ limit: "400" });
   const remoteData = await apiRequest<Record<string, unknown>>(path, {
     token,
+    searchParams,
   });
 
   return normalizeListEnvelope<ResourceItemMap[K]>(resource, remoteData).items;
