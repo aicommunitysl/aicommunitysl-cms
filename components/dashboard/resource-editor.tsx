@@ -58,12 +58,37 @@ function SpeakerListField({
   const entries: SpeakerEntry[] = Array.isArray(value)
     ? (value as SpeakerEntry[])
     : [];
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
   function updateEntry(index: number, field: keyof SpeakerEntry, val: string) {
     const next = entries.map((e, i) =>
       i === index ? { ...e, [field]: val } : e,
     );
     onChange(next);
+  }
+
+  async function handleImageUpload(index: number, file: File) {
+    try {
+      setUploadingIndex(index);
+      const payload = new FormData();
+      payload.set("file", file);
+      payload.set("folder", "speakers");
+      const response = await fetch("/api/upload/image", {
+        method: "POST",
+        body: payload,
+      });
+      const data = (await response.json()) as { url?: string; error?: string };
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || "Failed to upload image.");
+      }
+      updateEntry(index, "image_url", data.url);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to upload speaker image.",
+      );
+    } finally {
+      setUploadingIndex(null);
+    }
   }
 
   function addEntry() {
@@ -114,13 +139,50 @@ function SpeakerListField({
               <label className="block text-xs font-medium text-muted-foreground">
                 Image URL
               </label>
-              <Input
-                value={entry.image_url ?? ""}
-                placeholder="https://..."
-                onChange={(e) =>
-                  updateEntry(index, "image_url", e.target.value)
-                }
-              />
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <Input
+                  value={entry.image_url ?? ""}
+                  placeholder="https://..."
+                  onChange={(e) =>
+                    updateEntry(index, "image_url", e.target.value)
+                  }
+                />
+                <div className="flex shrink-0 items-center gap-2">
+                  <label className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card px-3 text-sm font-medium text-foreground transition hover:bg-muted">
+                    {uploadingIndex === index ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <UploadCloud className="h-4 w-4" />
+                    )}
+                    Upload
+                    <input
+                      className="hidden"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void handleImageUpload(index, file);
+                      }}
+                    />
+                  </label>
+                  {entry.image_url?.startsWith("http") && (
+                    <a
+                      href={entry.image_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Open full image"
+                      className="group relative h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-border/60 transition hover:border-primary/60 hover:ring-2 hover:ring-primary/30"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={entry.image_url}
+                        alt="Preview"
+                        className="h-full w-full object-cover transition group-hover:scale-110"
+                      />
+                    </a>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
