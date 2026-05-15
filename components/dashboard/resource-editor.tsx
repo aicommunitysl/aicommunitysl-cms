@@ -476,17 +476,12 @@ function renderField(
         <Select
           required={field.required}
           value={String(normalizeValue(value))}
-          onChange={(event) => onChange(field.name, event.target.value)}
-        >
-          {!field.required && (
-            <option value="">Select {field.label.toLowerCase()}…</option>
-          )}
-          {field.options?.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
+          onValueChange={(val) => onChange(field.name, val)}
+          options={field.options ?? []}
+          placeholder={
+            !field.required ? `Select ${field.label.toLowerCase()}…` : undefined
+          }
+        />
         {sharedDescription}
       </div>
     );
@@ -728,7 +723,7 @@ export function ResourceEditor({
 
   return (
     <div className="mx-auto w-full max-w-5xl">
-      <section className="section-shell animate-fade-up overflow-hidden">
+      <section className="section-shell animate-fade-up">
         <div className="border-b border-border/60 px-5 py-4 sm:px-6">
           <Link
             href={baseHref}
