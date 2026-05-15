@@ -478,6 +478,9 @@ function renderField(
           value={String(normalizeValue(value))}
           onChange={(event) => onChange(field.name, event.target.value)}
         >
+          {!field.required && (
+            <option value="">Select {field.label.toLowerCase()}…</option>
+          )}
           {field.options?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
