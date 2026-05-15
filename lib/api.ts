@@ -68,7 +68,22 @@ export async function apiRequest<T>(
     const errorData = await response
       .json()
       .catch(() => ({ detail: fallbackMessage }));
-    throw new Error(errorData.detail || fallbackMessage);
+    const detail = errorData.detail;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail)
+          ? detail
+              .map((d) =>
+                typeof d === "object" && d !== null && "msg" in d
+                  ? String(d.msg)
+                  : JSON.stringify(d),
+              )
+              .join("; ")
+          : detail
+            ? JSON.stringify(detail)
+            : fallbackMessage;
+    throw new Error(message);
   }
 
   if (response.status === 204) {
@@ -151,14 +166,11 @@ export async function updateTaskStatus(
   taskId: string,
   newStatus: string,
 ): Promise<EventTaskItem> {
-  return proxyFetch<EventTaskItem>(
-    `/api/cms/event-tasks/${taskId}/status`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    },
-  );
+  return proxyFetch<EventTaskItem>(`/api/cms/event-tasks/${taskId}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: newStatus }),
+  });
 }
 
 export async function deleteEventTask(taskId: string): Promise<void> {
