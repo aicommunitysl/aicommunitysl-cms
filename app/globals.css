@@ -1,0 +1,241 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Light mode - Clean Modern Blue */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222 47% 11%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222 47% 11%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222 47% 11%);
+  --primary: #0078d4;
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #0078d4;
+  --chart-1: #0078d4;
+  --chart-2: #17c964;
+  --chart-3: #f5a524;
+  --chart-4: #f31260;
+  --chart-5: #7828c8;
+  --radius: 0.625rem;
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: #0078d4;
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: #0078d4;
+}
+
+.dark {
+  /* Dark mode - Deep Blue & Slate */
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card: #0a101d;
+  --card-foreground: #f8fafc;
+  --popover: #0a101d;
+  --popover-foreground: #f8fafc;
+  --primary: #3498db;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #3498db;
+  --chart-1: #3498db;
+  --chart-2: #22c55e;
+  --chart-3: #eab308;
+  --chart-4: #ef4444;
+  --chart-5: #a855f7;
+  --sidebar: #0a101d;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #3498db;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #3498db;
+}
+
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-sans), sans-serif;
+  }
+  
+  button,
+  [role="button"],
+  a[href^="http"],
+  a[href^="/"] {
+    @apply cursor-pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: var(--card);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .glass-panel {
+    background: rgba(10, 16, 29, 0.88);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  }
+
+  .section-shell {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .section-shell {
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  }
+
+  .dash-grid {
+    background-image:
+      linear-gradient(rgba(0, 120, 212, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 120, 212, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  
+  .dark .dash-grid {
+    background-image:
+      linear-gradient(rgba(52, 152, 219, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52, 152, 219, 0.06) 1px, transparent 1px);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-subtle::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .scrollbar-subtle::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.16);
+    border-radius: 999px;
+  }
+  
+  .dark .scrollbar-subtle::-webkit-scrollbar-thumb {
+    background: rgba(248, 250, 252, 0.16);
+  }
+}
+
+/* Common Animations */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.45s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}

@@ -1,0 +1,20 @@
+cff-version: "1.2.0"
+message: "If you use this repository in your research or work, please cite it using the metadata below."
+title: "AI Community Sri Lanka - AI Community Sri Lanka CMS"
+version: "0.0.1"
+date-released: "2025-12-06"
+url: "https://github.com/aicommunitysl/aicommunitysl-cms"
+authors:
+  - name: "AI Community Sri Lanka"
+    affiliation: "GitHub: aicommunitysl"
+  - name: "Dileepa Bandara"
+    affiliation: "GitHub: dileepadev"
+keywords:
+  - Community
+  - Standards
+  - GitHub
+  - AI Community Sri Lanka
+license: "MIT"
+abstract: |
+  This repository contains the official CMS files for AI Community Sri Lanka.
+repository-code: "https://github.com/aicommunitysl/aicommunitysl-cms"
